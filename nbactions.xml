@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Modbus Client</actionName>
+            <displayName>Modbus Client</displayName>
+            <goals>
+                <goal>test</goal>
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>modbus-client</activatedProfile>
+            </activatedProfiles>
+        </action>
+    </actions>
