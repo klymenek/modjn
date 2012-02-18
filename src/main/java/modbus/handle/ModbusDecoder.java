@@ -1,9 +1,9 @@
 package modbus.handle;
 
 import modbus.func.WriteCoil;
+import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
-import modbus.model.ModbusResponse;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -23,22 +23,21 @@ public class ModbusDecoder extends FrameDecoder {
                 buffer.readUnsignedShort(),
                 buffer.readUnsignedByte());
 
-        ModbusResponse modbusADU = new ModbusResponse(mbapHeader);
-
         short functionCode = buffer.readUnsignedByte();
 
+        ModbusFunction function = null;
         switch (functionCode) {
             case ModbusFunction.WRITE_COIL:
-                WriteCoil response = new WriteCoil();
-                response.decode(buffer.readBytes(buffer.readableBytes()));
-
-                modbusADU.setResponse(response);
+                function = new WriteCoil();
+                function.decode(buffer.readBytes(buffer.readableBytes()));
                 break;
             default:
                 //buffer.resetReaderIndex();
                 throw new CorruptedFrameException(
                         "Invalid Function Code: " + functionCode);
         }
+        
+                ModbusFrame modbusADU = new ModbusFrame(mbapHeader, function);
 
         return modbusADU;
     }

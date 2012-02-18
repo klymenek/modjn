@@ -6,9 +6,8 @@ import java.util.concurrent.Executors;
 import modbus.func.WriteCoil;
 import modbus.handle.ModbusHandler;
 import modbus.handle.ModbusPipelineFactory;
+import modbus.model.ModbusFrame;
 import modbus.model.ModbusHeader;
-import modbus.model.ModbusRequest;
-import modbus.model.ModbusResponse;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -18,6 +17,7 @@ public class ModbusTCPClient {
 
     private final String host;
     private final int port;
+    private int lastTransactionIdentifier = 0;
     Channel channel;
     ClientBootstrap bootstrap;
 
@@ -47,25 +47,38 @@ public class ModbusTCPClient {
         }
     }
 
-    public ModbusResponse writeCoil(int address, boolean state) {
+    private synchronized int calculateTransactionIdentifier() {
+        if (lastTransactionIdentifier < ModbusConstants.TRANSACTION_COUNTER_RESET) {
+            lastTransactionIdentifier++;
+        } else {
+            lastTransactionIdentifier = 1;
+        }
+        return lastTransactionIdentifier;
+    }
+
+    public ModbusFrame writeCoil(int address, boolean state) {
         int value = 0x0000;
-        if(state) value = 0xFF00;
-        
-        ModbusHeader header = new ModbusHeader(1, 0, 6, (short) 0);
+        if (state) {
+            value = 0xFF00;
+        }
+
+        int transactionIdentifier = calculateTransactionIdentifier();
+
+        ModbusHeader header = new ModbusHeader(transactionIdentifier, 0, 6, (short) 0);
         WriteCoil wc = new WriteCoil(address, value);
-        ModbusRequest adu = new ModbusRequest(header, wc);
+        ModbusFrame adu = new ModbusFrame(header, wc);
         channel.write(adu);
 
         // Get the handler instance to retrieve the answer.
         ModbusHandler handler = (ModbusHandler) channel.getPipeline().getLast();
 
-        return handler.getResponse();
+        return handler.getResponse(transactionIdentifier);
     }
-    
+
     public void close() {
         channel.close();
         channel.getCloseFuture().awaitUninterruptibly();
-        
+
         // Shut down all thread pools to exit.
         bootstrap.releaseExternalResources();
     }
@@ -90,18 +103,18 @@ public class ModbusTCPClient {
             host = args[0];
             port = Integer.parseInt(args[1]);
         }
-        
+
         ModbusTCPClient modbusClient = new ModbusTCPClient(host, port);
         modbusClient.run();
-        
-        System.out.println(modbusClient.writeCoil(12321, true));
-        Thread.sleep(1000);
-        System.out.println(modbusClient.writeCoil(12321, false));
-        Thread.sleep(1000);
-        System.out.println(modbusClient.writeCoil(12321, true));
-        Thread.sleep(1000);
-        System.out.println(modbusClient.writeCoil(12321, false));
-        
+
+        boolean state = true;
+        for (int i = 0; i < 20; i++) {
+            System.out.println(modbusClient.writeCoil(12321, state));
+            Thread.sleep(1000);
+            
+            state = state ? false : true;
+        }
+
         modbusClient.close();
     }
 }

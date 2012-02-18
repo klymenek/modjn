@@ -14,8 +14,8 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 public class ModbusPipelineFactory implements
         ChannelPipelineFactory {
     
-    private static final ChannelHandler ADU_ENCODER = new ModbusEncoder();
-    private static final ChannelHandler ADU_DECODER = new ModbusDecoder();
+    private static final ChannelHandler MODBUS_ENCODER = new ModbusEncoder();
+    private static final ChannelHandler MODBUS_DECODER = new ModbusDecoder();
     
     public ChannelPipeline getPipeline() throws Exception {
         ChannelPipeline pipeline = Channels.pipeline();
@@ -34,9 +34,9 @@ public class ModbusPipelineFactory implements
          */
         pipeline.addLast("framer", new LengthFieldBasedFrameDecoder(ModbusConstants.ADU_MAX_LENGTH, 4, 2));
 
-        //ADU encoder, decoder
-        pipeline.addLast("encoder", ADU_ENCODER);
-        pipeline.addLast("decoder", ADU_DECODER);
+        //Modbus encoder, decoder
+        pipeline.addLast("encoder", MODBUS_ENCODER);
+        pipeline.addLast("decoder", MODBUS_DECODER);
 
         // and then business logic.
         pipeline.addLast("handler", new ModbusHandler());

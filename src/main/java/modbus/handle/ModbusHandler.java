@@ -1,9 +1,10 @@
 package modbus.handle;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
-import modbus.model.ModbusResponse;
+import modbus.ModbusConstants;
+import modbus.model.ModbusFrame;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -18,16 +19,16 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 public class ModbusHandler extends SimpleChannelUpstreamHandler {
 
     static final Logger logger = Logger.getLogger(ModbusHandler.class.getSimpleName());
-    final BlockingQueue<ModbusResponse> answer = new LinkedBlockingQueue<ModbusResponse>();
+    final Map<Integer, ModbusFrame> responses = new HashMap<Integer, ModbusFrame>(ModbusConstants.TRANSACTION_COUNTER_RESET);
 
-    public ModbusResponse getResponse() {
-        try {
-            ModbusResponse adu = answer.take();
-            return adu;
-        } catch (InterruptedException ex) {
-            logger.warning(ex.getLocalizedMessage());
-            return null;
-        }
+    public ModbusFrame getResponse(int transactionIdentifier) {
+        long timeoutTime = System.currentTimeMillis() + ModbusConstants.RESPONSE_TIMEOUT;
+        ModbusFrame frame;
+        do {
+            frame = responses.get(transactionIdentifier);
+        } while (frame == null && (timeoutTime - System.currentTimeMillis()) > 0);
+
+        return frame;
     }
 
     @Override
@@ -41,8 +42,12 @@ public class ModbusHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        boolean offered = answer.offer((ModbusResponse) e.getMessage());
-        assert offered;
+        Object message = e.getMessage();
+
+        if (message instanceof ModbusFrame) {
+            ModbusFrame response = (ModbusFrame) message;
+            responses.put(response.getHeader().getTransactionIdentifier(), response);
+        }
     }
 
     @Override

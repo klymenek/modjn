@@ -1,8 +1,6 @@
 package modbus.func;
 
 import modbus.model.ModbusFunction;
-import modbus.model.RequestInterface;
-import modbus.model.ResponseInterface;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
@@ -10,7 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author ares
  */
-public class WriteCoil extends ModbusFunction implements RequestInterface, ResponseInterface {
+public class WriteCoil extends ModbusFunction {
 
     private int outputAddress;
     private int outputValue;

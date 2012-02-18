@@ -7,22 +7,22 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author ag
  */
-public class ModbusRequest {
+public class ModbusFrame {
 
     private final ModbusHeader header;
-    private RequestInterface request;
+    private ModbusFunction function;
 
-    public ModbusRequest(ModbusHeader header, RequestInterface request) {
+    public ModbusFrame(ModbusHeader header, ModbusFunction function) {
         this.header = header;
-        this.request = request;
+        this.function = function;
     }
 
     public ModbusHeader getHeader() {
         return header;
     }
 
-    public RequestInterface getRequest() {
-        return request;
+    public ModbusFunction getFunction() {
+        return function;
     }
 
     public ChannelBuffer encode() {
@@ -33,13 +33,13 @@ public class ModbusRequest {
         buf.writeShort(header.getLength());
         buf.writeByte(header.getUnitIdentifier());
 
-        buf.writeBytes(request.encode());
+        buf.writeBytes(function.encode());
 
         return buf;
     }
 
     @Override
     public String toString() {
-        return "ModbusRequestADU{" + "header=" + header + ", request=" + request + '}';
+        return "ModbusClientRequest{" + "header=" + header + ", function=" + function + '}';
     }
 }
