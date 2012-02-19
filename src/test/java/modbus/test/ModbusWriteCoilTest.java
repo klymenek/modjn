@@ -36,6 +36,7 @@ public class ModbusWriteCoilTest {
     @Before
     public void setUp() throws Exception {
         modbusServer = new ModbusTCPServer(ModbusConstants.MODBUS_DEFAULT_PORT);
+        modbusServer.run();
         
         modbusClient = new ModbusTCPClient("localhost" /* "192.168.1.55" */, ModbusConstants.MODBUS_DEFAULT_PORT);
         modbusClient.run();
@@ -58,5 +59,7 @@ public class ModbusWriteCoilTest {
     @After
     public void tearDown() throws Exception {
         modbusClient.close();
+        
+        modbusServer.close();
     }
 }
