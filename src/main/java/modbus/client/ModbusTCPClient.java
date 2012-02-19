@@ -1,20 +1,22 @@
-package modbus;
+package modbus.client;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+import modbus.ModbusConstants;
+import modbus.ModbusPipelineFactory;
 import modbus.func.WriteCoil;
-import modbus.handle.ModbusHandler;
-import modbus.handle.ModbusPipelineFactory;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusHeader;
+import modbus.server.ModbusTCPServer;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
 public class ModbusTCPClient {
-
+    
+    static final Logger logger = Logger.getLogger(ModbusTCPClient.class.getSimpleName());
     private final String host;
     private final int port;
     private int lastTransactionIdentifier = 0;
@@ -26,7 +28,7 @@ public class ModbusTCPClient {
         this.port = port;
     }
 
-    public void run() throws IOException {
+    public void run() {
         // Configure the client.
         bootstrap = new ClientBootstrap(
                 new NioClientSocketChannelFactory(
@@ -34,7 +36,7 @@ public class ModbusTCPClient {
                 Executors.newCachedThreadPool()));
 
         // Configure the pipeline factory.
-        bootstrap.setPipelineFactory(new ModbusPipelineFactory());
+        bootstrap.setPipelineFactory(new ModbusPipelineFactory(false));
 
         // Start the connection attempt.
         ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
@@ -42,7 +44,7 @@ public class ModbusTCPClient {
         // Wait until the connection is made successfully.
         channel = connectFuture.awaitUninterruptibly().getChannel();
         if (!connectFuture.isSuccess()) {
-            System.out.println(connectFuture.getCause().getLocalizedMessage());
+            logger.warning(connectFuture.getCause().getLocalizedMessage());
             bootstrap.releaseExternalResources();
         }
     }
@@ -70,7 +72,7 @@ public class ModbusTCPClient {
         channel.write(adu);
 
         // Get the handler instance to retrieve the answer.
-        ModbusHandler handler = (ModbusHandler) channel.getPipeline().getLast();
+        ModbusClientHandler handler = (ModbusClientHandler) channel.getPipeline().getLast();
 
         return handler.getResponse(transactionIdentifier);
     }
@@ -97,12 +99,15 @@ public class ModbusTCPClient {
                     + ModbusConstants.MODBUS_DEFAULT_PORT);
 
             port = ModbusConstants.MODBUS_DEFAULT_PORT;
-            host = "192.168.1.55";
+            host = "localhost";
         } else {
             // Parse options.
             host = args[0];
             port = Integer.parseInt(args[1]);
         }
+        
+        ModbusTCPServer server = new ModbusTCPServer(port);
+        server.run();
 
         ModbusTCPClient modbusClient = new ModbusTCPClient(host, port);
         modbusClient.run();

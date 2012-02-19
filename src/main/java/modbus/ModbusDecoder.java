@@ -1,4 +1,4 @@
-package modbus.handle;
+package modbus;
 
 import modbus.func.WriteCoil;
 import modbus.model.ModbusFrame;

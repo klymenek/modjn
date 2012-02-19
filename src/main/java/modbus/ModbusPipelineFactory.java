@@ -1,6 +1,7 @@
-package modbus.handle;
+package modbus;
 
-import modbus.ModbusConstants;
+import modbus.client.ModbusClientHandler;
+import modbus.server.ModbusServerHandler;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -16,6 +17,12 @@ public class ModbusPipelineFactory implements
     
     private static final ChannelHandler MODBUS_ENCODER = new ModbusEncoder();
     private static final ChannelHandler MODBUS_DECODER = new ModbusDecoder();
+    
+    private final boolean server;
+
+    public ModbusPipelineFactory(boolean server) {
+        this.server = server;
+    }
     
     public ChannelPipeline getPipeline() throws Exception {
         ChannelPipeline pipeline = Channels.pipeline();
@@ -39,8 +46,12 @@ public class ModbusPipelineFactory implements
         pipeline.addLast("decoder", MODBUS_DECODER);
 
         // and then business logic.
-        pipeline.addLast("handler", new ModbusHandler());
-
+        if(server) {
+            pipeline.addLast("handler", new ModbusServerHandler());
+        } else {    
+            pipeline.addLast("handler", new ModbusClientHandler());
+        }
+        
         return pipeline;
     }
 }

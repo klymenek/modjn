@@ -40,6 +40,6 @@ public class ModbusFrame {
 
     @Override
     public String toString() {
-        return "ModbusClientRequest{" + "header=" + header + ", function=" + function + '}';
+        return "ModbusFrame{" + "header=" + header + ", function=" + function + '}';
     }
 }

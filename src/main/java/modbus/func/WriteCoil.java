@@ -54,6 +54,6 @@ public class WriteCoil extends ModbusFunction {
 
     @Override
     public String toString() {
-        return "WriteCoilRequest{" + "outputAddress=" + outputAddress + ", outputValue=" + outputValue + '}';
+        return "WriteCoil{" + "outputAddress=" + outputAddress + ", outputValue=" + outputValue + '}';
     }
 }

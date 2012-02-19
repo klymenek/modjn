@@ -1,4 +1,4 @@
-package modbus.handle;
+package modbus.client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +16,9 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
  *
  * @author ares
  */
-public class ModbusHandler extends SimpleChannelUpstreamHandler {
+public class ModbusClientHandler extends SimpleChannelUpstreamHandler {
 
-    static final Logger logger = Logger.getLogger(ModbusHandler.class.getSimpleName());
+    static final Logger logger = Logger.getLogger(ModbusClientHandler.class.getSimpleName());
     final Map<Integer, ModbusFrame> responses = new HashMap<Integer, ModbusFrame>(ModbusConstants.TRANSACTION_COUNTER_RESET);
 
     public ModbusFrame getResponse(int transactionIdentifier) {

@@ -1,4 +1,4 @@
-package modbus.handle;
+package modbus;
 
 import modbus.model.ModbusFrame;
 import org.jboss.netty.channel.ChannelHandlerContext;
