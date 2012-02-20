@@ -15,12 +15,15 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 public class ModbusPipelineFactory implements
         ChannelPipelineFactory {
     
-    private static final ChannelHandler MODBUS_ENCODER = new ModbusEncoder();
-    private static final ChannelHandler MODBUS_DECODER = new ModbusDecoder();
+    private final ChannelHandler MODBUS_ENCODER;
+    private final ChannelHandler MODBUS_DECODER;
     
     private final boolean server;
 
     public ModbusPipelineFactory(boolean server) {
+        MODBUS_ENCODER = new ModbusEncoder();
+        MODBUS_DECODER = new ModbusDecoder(server);
+        
         this.server = server;
     }
     

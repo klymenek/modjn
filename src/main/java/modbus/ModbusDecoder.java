@@ -1,6 +1,9 @@
 package modbus;
 
-import modbus.func.WriteCoil;
+import modbus.func.ModbusError;
+import modbus.func.ReadCoilsRequest;
+import modbus.func.ReadCoilsResponse;
+import modbus.func.WriteSingleCoil;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
@@ -16,8 +19,16 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
  */
 public class ModbusDecoder extends FrameDecoder {
 
+    private final boolean server;
+
+    public ModbusDecoder(boolean server) {
+        this.server = server;
+    }
+
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, Channel channel,
+            ChannelBuffer buffer) throws Exception {
+
         ModbusHeader mbapHeader = new ModbusHeader(buffer.readUnsignedShort(),
                 buffer.readUnsignedShort(),
                 buffer.readUnsignedShort(),
@@ -27,18 +38,29 @@ public class ModbusDecoder extends FrameDecoder {
 
         ModbusFunction function = null;
         switch (functionCode) {
-            case ModbusFunction.WRITE_COIL:
-                function = new WriteCoil();
-                function.decode(buffer.readBytes(buffer.readableBytes()));
+            case ModbusFunction.READ_COILS:
+                if (server) {
+                    function = new ReadCoilsRequest();
+                } else {
+                    function = new ReadCoilsResponse();
+                }
                 break;
-            default:
-                //buffer.resetReaderIndex();
-                throw new CorruptedFrameException(
-                        "Invalid Function Code: " + functionCode);
+            case ModbusFunction.WRITE_SINGLE_COIL:
+                function = new WriteSingleCoil();
+                break;
         }
-        
-                ModbusFrame modbusADU = new ModbusFrame(mbapHeader, function);
 
-        return modbusADU;
+        if (ModbusFunction.isError(functionCode)) {
+            function = new ModbusError(functionCode);
+        } else if (function == null) {
+            throw new CorruptedFrameException(
+                    "Invalid Function Code: " + functionCode);
+        }
+
+        function.decode(buffer.readBytes(buffer.readableBytes()));
+
+        ModbusFrame frame = new ModbusFrame(mbapHeader, function);
+
+        return frame;
     }
 }

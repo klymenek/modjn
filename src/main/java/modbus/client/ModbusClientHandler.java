@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import modbus.ModbusConstants;
+import modbus.exception.ErrorResponseException;
+import modbus.exception.NoResponseException;
 import modbus.model.ModbusFrame;
+import modbus.model.ModbusFunction;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -21,12 +24,20 @@ public class ModbusClientHandler extends SimpleChannelUpstreamHandler {
     static final Logger logger = Logger.getLogger(ModbusClientHandler.class.getSimpleName());
     final Map<Integer, ModbusFrame> responses = new HashMap<Integer, ModbusFrame>(ModbusConstants.TRANSACTION_COUNTER_RESET);
 
-    public ModbusFrame getResponse(int transactionIdentifier) {
+    public ModbusFrame getResponse(int transactionIdentifier)
+            throws NoResponseException, ErrorResponseException {
+
         long timeoutTime = System.currentTimeMillis() + ModbusConstants.RESPONSE_TIMEOUT;
         ModbusFrame frame;
         do {
             frame = responses.get(transactionIdentifier);
         } while (frame == null && (timeoutTime - System.currentTimeMillis()) > 0);
+
+        if (frame == null) {
+            throw new NoResponseException();
+        } else if (ModbusFunction.isError(frame.getFunction().getFunctionCode())) {
+            throw new ErrorResponseException(frame.getFunction().getFunctionCode());
+        }
 
         return frame;
     }

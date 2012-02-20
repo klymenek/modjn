@@ -13,7 +13,9 @@ import org.jboss.netty.channel.SimpleChannelDownstreamHandler;
 public class ModbusEncoder extends SimpleChannelDownstreamHandler {
 
     @Override
-    public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    public void writeRequested(ChannelHandlerContext ctx, MessageEvent e)
+            throws Exception {
+
         ModbusFrame frame = (ModbusFrame) e.getMessage();
 
         Channels.write(ctx, e.getFuture(), frame.encode());

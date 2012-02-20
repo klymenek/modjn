@@ -1,9 +1,13 @@
 package modbus.server;
 
+import java.util.BitSet;
 import java.util.logging.Logger;
-import modbus.func.WriteCoil;
+import modbus.func.ReadCoilsRequest;
+import modbus.func.ReadCoilsResponse;
+import modbus.func.WriteSingleCoil;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
+import modbus.model.ModbusHeader;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -38,14 +42,33 @@ public class ModbusServerHandler extends SimpleChannelUpstreamHandler {
         Object message = e.getMessage();
 
         if (message instanceof ModbusFrame) {
-            ModbusFrame request = (ModbusFrame) message;
-            ModbusFunction func = request.getFunction();
-            
-            if(func instanceof WriteCoil) {
-                WriteCoil function = (WriteCoil) func;
-                logger.info(function.toString());
-                
+            ModbusFrame frame = (ModbusFrame) message;
+            ModbusFunction function = frame.getFunction();
+
+            if (function instanceof WriteSingleCoil) {
+                WriteSingleCoil request = (WriteSingleCoil) function;
+                logger.info(request.toString());
+
                 e.getChannel().write(message);
+            } else if (function instanceof ReadCoilsRequest) {
+                ReadCoilsRequest request = (ReadCoilsRequest) function;
+                logger.info(request.toString());
+
+                BitSet coils = new BitSet(request.getQuantityOfCoils());
+                coils.set(0);
+                coils.set(5);
+                coils.set(8);
+
+                ReadCoilsResponse response = new ReadCoilsResponse(coils);
+                ModbusHeader header = new ModbusHeader(
+                        frame.getHeader().getTransactionIdentifier(),
+                        frame.getHeader().getProtocolIdentifier(),
+                        response.calculateLength(),
+                        frame.getHeader().getUnitIdentifier());
+
+                ModbusFrame responseFrame = new ModbusFrame(header, response);
+
+                e.getChannel().write(responseFrame);
             }
         }
     }

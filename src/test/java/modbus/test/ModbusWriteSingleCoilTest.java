@@ -17,7 +17,9 @@ package modbus.test;
 
 import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
-import modbus.model.ModbusFrame;
+import modbus.exception.ErrorResponseException;
+import modbus.exception.NoResponseException;
+import modbus.func.WriteSingleCoil;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +30,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusWriteCoilTest {
+public class ModbusWriteSingleCoilTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -43,10 +45,10 @@ public class ModbusWriteCoilTest {
     }
 
     @Test
-    public void testWriteCoil() {
+    public void testWriteCoil() throws NoResponseException, ErrorResponseException {
         boolean state = true;
         for (int i = 0; i < 20; i++) {
-            ModbusFrame writeCoil = modbusClient.writeCoil(12321, state);
+            WriteSingleCoil writeCoil = modbusClient.writeCoil(12321, state);
 
             assertNotNull(writeCoil);
 
