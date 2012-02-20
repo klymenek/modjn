@@ -32,6 +32,8 @@ public class ModbusClientHandler extends SimpleChannelUpstreamHandler {
         do {
             frame = responses.get(transactionIdentifier);
         } while (frame == null && (timeoutTime - System.currentTimeMillis()) > 0);
+        
+        if(frame != null) responses.remove(transactionIdentifier);
 
         if (frame == null) {
             throw new NoResponseException();

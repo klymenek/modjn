@@ -121,7 +121,7 @@ public class ModbusTCPClient {
                     + ModbusConstants.MODBUS_DEFAULT_PORT);
 
             port = ModbusConstants.MODBUS_DEFAULT_PORT;
-            host = "localhost";
+            host = "192.168.1.55";
         } else {
             // Parse options.
             host = args[0];
@@ -131,17 +131,22 @@ public class ModbusTCPClient {
         ModbusTCPServer server = new ModbusTCPServer(port);
         server.run();
 
-        ModbusTCPClient modbusClient = new ModbusTCPClient(host, port);
-        modbusClient.run();
+        ModbusTCPClient client = new ModbusTCPClient(host, port);
+        client.run();
 
         boolean state = true;
         for (int i = 0; i < 20; i++) {
-            System.out.println(modbusClient.writeCoil(12321, state));
-            Thread.sleep(1000);
+            System.out.println(client.writeCoil(12321, state));
+            //Thread.sleep(1000);
 
             state = state ? false : true;
         }
 
-        modbusClient.close();
+        ReadCoilsResponse readCoils = client.readCoils(12321, 5);
+        System.out.println(readCoils);
+
+        client.close();
+
+        server.close();
     }
 }
