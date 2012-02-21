@@ -15,16 +15,18 @@
  */
 package modbus.exception;
 
+import modbus.func.ModbusError;
+import modbus.model.ModbusFunction;
+
 /**
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ErrorResponseException extends Exception {   
+public class ErrorResponseException extends Exception {
+
     int exceptionCode;
 
-    public ErrorResponseException(int errorCode) {
-        super("Exception Code: " + errorCode);
-        
-        this.exceptionCode = errorCode;
+    public ErrorResponseException(ModbusFunction function) {
+        super(((ModbusError) function).toString());
     }
 }

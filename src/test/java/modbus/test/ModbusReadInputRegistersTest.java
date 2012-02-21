@@ -20,6 +20,7 @@ import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
 import modbus.func.ReadCoilsResponse;
+import modbus.func.ReadInputRegistersResponse;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +31,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusReadCoilsTest {
+public class ModbusReadInputRegistersTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -47,12 +48,12 @@ public class ModbusReadCoilsTest {
     }
 
     @Test
-    public void testReadCoils() throws NoResponseException, ErrorResponseException {
-        ReadCoilsResponse readCoils = modbusClient.readCoils(12321, 10);
+    public void testReadInputRegisters() throws NoResponseException, ErrorResponseException {
+        ReadInputRegistersResponse readInputRegisters = modbusClient.readInputRegisters(12321, 10);
 
-        assertNotNull(readCoils);
+        assertNotNull(readInputRegisters);
 
-        System.out.println(readCoils);
+        System.out.println(readInputRegisters);
     }
 
     @After

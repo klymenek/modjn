@@ -38,7 +38,7 @@ public class ModbusClientHandler extends SimpleChannelUpstreamHandler {
         if (frame == null) {
             throw new NoResponseException();
         } else if (ModbusFunction.isError(frame.getFunction().getFunctionCode())) {
-            throw new ErrorResponseException(frame.getFunction().getFunctionCode());
+            throw new ErrorResponseException(frame.getFunction());
         }
 
         return frame;

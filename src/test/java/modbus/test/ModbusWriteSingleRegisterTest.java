@@ -19,7 +19,8 @@ import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
-import modbus.func.ReadCoilsResponse;
+import modbus.func.WriteSingleCoil;
+import modbus.func.WriteSingleRegister;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +31,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusReadCoilsTest {
+public class ModbusWriteSingleRegisterTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -47,12 +48,19 @@ public class ModbusReadCoilsTest {
     }
 
     @Test
-    public void testReadCoils() throws NoResponseException, ErrorResponseException {
-        ReadCoilsResponse readCoils = modbusClient.readCoils(12321, 10);
+    public void testWriteRegister() throws NoResponseException, ErrorResponseException {
+        boolean state = true;
+        int value = 0x0000;
+        for (int i = 0; i < 20; i++) {
+            WriteSingleRegister writeRegister = modbusClient.writeRegister(12321, value);
 
-        assertNotNull(readCoils);
+            assertNotNull(writeRegister);
 
-        System.out.println(readCoils);
+            System.out.println(writeRegister);
+
+            value = state ? 0x0000 : 0xFFFF;
+            state = state ? false : true;
+        }
     }
 
     @After

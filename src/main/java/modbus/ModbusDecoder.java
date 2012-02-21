@@ -3,7 +3,10 @@ package modbus;
 import modbus.func.ModbusError;
 import modbus.func.ReadCoilsRequest;
 import modbus.func.ReadCoilsResponse;
+import modbus.func.ReadInputRegistersRequest;
+import modbus.func.ReadInputRegistersResponse;
 import modbus.func.WriteSingleCoil;
+import modbus.func.WriteSingleRegister;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
@@ -45,8 +48,18 @@ public class ModbusDecoder extends FrameDecoder {
                     function = new ReadCoilsResponse();
                 }
                 break;
+            case ModbusFunction.READ_INPUT_REGISTERS:
+                if (server) {
+                    function = new ReadInputRegistersRequest();
+                } else {
+                    function = new ReadInputRegistersResponse();
+                }
+                break;
             case ModbusFunction.WRITE_SINGLE_COIL:
                 function = new WriteSingleCoil();
+                break;
+            case ModbusFunction.WRITE_SINGLE_REGISTER:
+                function = new WriteSingleRegister();
                 break;
         }
 

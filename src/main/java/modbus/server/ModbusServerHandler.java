@@ -4,7 +4,10 @@ import java.util.BitSet;
 import java.util.logging.Logger;
 import modbus.func.ReadCoilsRequest;
 import modbus.func.ReadCoilsResponse;
+import modbus.func.ReadInputRegistersRequest;
+import modbus.func.ReadInputRegistersResponse;
 import modbus.func.WriteSingleCoil;
+import modbus.func.WriteSingleRegister;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
@@ -50,6 +53,11 @@ public class ModbusServerHandler extends SimpleChannelUpstreamHandler {
                 logger.info(request.toString());
 
                 e.getChannel().write(message);
+            } else if (function instanceof WriteSingleRegister) {
+                WriteSingleRegister request = (WriteSingleRegister) function;
+                logger.info(request.toString());
+
+                e.getChannel().write(message);
             } else if (function instanceof ReadCoilsRequest) {
                 ReadCoilsRequest request = (ReadCoilsRequest) function;
                 logger.info(request.toString());
@@ -60,6 +68,25 @@ public class ModbusServerHandler extends SimpleChannelUpstreamHandler {
                 coils.set(8);
 
                 ReadCoilsResponse response = new ReadCoilsResponse(coils);
+                ModbusHeader header = new ModbusHeader(
+                        frame.getHeader().getTransactionIdentifier(),
+                        frame.getHeader().getProtocolIdentifier(),
+                        response.calculateLength(),
+                        frame.getHeader().getUnitIdentifier());
+
+                ModbusFrame responseFrame = new ModbusFrame(header, response);
+
+                e.getChannel().write(responseFrame);
+            } else if (function instanceof ReadInputRegistersRequest) {
+                ReadInputRegistersRequest request = (ReadInputRegistersRequest) function;
+                logger.info(request.toString());
+
+                int[] registers = new int[request.getQuantityOfInputRegisters()];
+                registers[0] = 0xFFFF;
+                registers[1] = 0xF0F0;
+                registers[2] = 0x0F0F;
+
+                ReadInputRegistersResponse response = new ReadInputRegistersResponse(registers);
                 ModbusHeader header = new ModbusHeader(
                         frame.getHeader().getTransactionIdentifier(),
                         frame.getHeader().getProtocolIdentifier(),

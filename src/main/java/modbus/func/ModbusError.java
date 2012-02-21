@@ -143,4 +143,9 @@ public class ModbusError extends ModbusFunction {
     public void decode(ChannelBuffer data) {
         exceptionCode = data.readUnsignedByte();
     }
+
+    @Override
+    public String toString() {
+        return "ModbusError{" + "exceptionCode=" + exceptionCode + '}';
+    }
 }

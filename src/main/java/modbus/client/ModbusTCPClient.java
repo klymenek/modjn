@@ -1,7 +1,6 @@
 package modbus.client;
 
 import java.net.InetSocketAddress;
-import java.util.BitSet;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import modbus.ModbusConstants;
@@ -10,7 +9,10 @@ import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
 import modbus.func.ReadCoilsRequest;
 import modbus.func.ReadCoilsResponse;
+import modbus.func.ReadInputRegistersRequest;
+import modbus.func.ReadInputRegistersResponse;
 import modbus.func.WriteSingleCoil;
+import modbus.func.WriteSingleRegister;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
@@ -91,12 +93,28 @@ public class ModbusTCPClient {
         return (WriteSingleCoil) callModbusFunction(wc);
     }
 
+    public WriteSingleRegister writeRegister(int address, int value)
+            throws NoResponseException, ErrorResponseException {
+
+        WriteSingleRegister wr = new WriteSingleRegister(address, value);
+
+        return (WriteSingleRegister) callModbusFunction(wr);
+    }
+
     public ReadCoilsResponse readCoils(int startAddress, int quantityOfCoils)
             throws NoResponseException, ErrorResponseException {
 
         ReadCoilsRequest rr = new ReadCoilsRequest(startAddress, quantityOfCoils);
 
         return (ReadCoilsResponse) callModbusFunction(rr);
+    }
+
+    public ReadInputRegistersResponse readInputRegisters(int startAddress, int quantityOfInputRegisters)
+            throws NoResponseException, ErrorResponseException {
+
+        ReadInputRegistersRequest rir = new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters);
+
+        return (ReadInputRegistersResponse) callModbusFunction(rir);
     }
 
     public void close() {
@@ -144,6 +162,9 @@ public class ModbusTCPClient {
 
         ReadCoilsResponse readCoils = client.readCoils(12321, 5);
         System.out.println(readCoils);
+        
+        ReadInputRegistersResponse readInputRegisters = client.readInputRegisters(12321, 6);
+        System.out.println(readInputRegisters);
 
         client.close();
 
