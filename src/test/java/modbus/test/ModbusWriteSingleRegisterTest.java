@@ -19,7 +19,6 @@ import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
-import modbus.func.WriteSingleCoil;
 import modbus.func.WriteSingleRegister;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;

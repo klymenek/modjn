@@ -23,7 +23,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadInputRegistersRequest extends ModbusFunction {
+public class ReadHoldingRegistersRequest extends ModbusFunction {
 
     private int startingAddress; // 0x0000 to 0xFFFF
     private int quantityOfInputRegisters; // 1 - 125
@@ -31,15 +31,15 @@ public class ReadInputRegistersRequest extends ModbusFunction {
     /*
      * Constructor for Response
      */
-    public ReadInputRegistersRequest() {
-        super(READ_INPUT_REGISTERS);
+    public ReadHoldingRegistersRequest() {
+        super(READ_HOLDING_REGISTERS);
     }
 
     /*
      * Constructor for Request
      */
-    public ReadInputRegistersRequest(int startingAddress, int quantityOfInputRegisters) {
-        super(READ_INPUT_REGISTERS);
+    public ReadHoldingRegistersRequest(int startingAddress, int quantityOfInputRegisters) {
+        super(READ_HOLDING_REGISTERS);
 
         this.startingAddress = startingAddress;
         this.quantityOfInputRegisters = quantityOfInputRegisters;
@@ -77,6 +77,6 @@ public class ReadInputRegistersRequest extends ModbusFunction {
 
     @Override
     public String toString() {
-        return "ReadInputRegistersRequest{" + "startingAddress=" + startingAddress + ", quantityOfInputRegisters=" + quantityOfInputRegisters + '}';
+        return "ReadHoldingRegistersRequest{" + "startingAddress=" + startingAddress + ", quantityOfInputRegisters=" + quantityOfInputRegisters + '}';
     }
 }

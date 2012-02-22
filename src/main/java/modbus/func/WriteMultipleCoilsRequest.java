@@ -24,60 +24,80 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadCoilsResponse extends ModbusFunction {
+public class WriteMultipleCoilsRequest extends ModbusFunction {
 
+    private int startingAddress; // 0x0000 to 0xFFFF
+    private int quantityOfOutputs; // 1 - 1968 (0x07B0)
     private short byteCount;
-    private BitSet coilStatus;
+    private BitSet outputsValue;
 
-    public ReadCoilsResponse() {
-        super(READ_COILS);
+    public WriteMultipleCoilsRequest() {
+        super(WRITE_MULTIPLE_COILS);
     }
 
-    public ReadCoilsResponse(BitSet coilStatus) {
-        super(READ_COILS);
+    public WriteMultipleCoilsRequest(int startingAddress, int quantityOfOutputs, BitSet outputsValue) {
+        super(WRITE_MULTIPLE_COILS);
 
-        byte[] coils = coilStatus.toByteArray();
+        byte[] coils = outputsValue.toByteArray();
 
-        // maximum of 2000 bits
-        if (coils.length > 250) {
+        // maximum of 1968 bits
+        if (coils.length > 246) {
             throw new IllegalArgumentException();
         }
 
         this.byteCount = (short) coils.length;
-        this.coilStatus = coilStatus;
+        this.outputsValue = outputsValue;
+        this.startingAddress = startingAddress;
+        this.quantityOfOutputs = quantityOfOutputs;
     }
 
-    public BitSet getCoilStatus() {
-        return coilStatus;
+    public short getByteCount() {
+        return byteCount;
+    }
+
+    public BitSet getOutputsValue() {
+        return outputsValue;
+    }
+
+    public int getQuantityOfOutputs() {
+        return quantityOfOutputs;
+    }
+
+    public int getStartingAddress() {
+        return startingAddress;
     }
 
     @Override
     public int calculateLength() {
-        return 1 + 1 + byteCount + 1; // + 1 for Unit Identifier;
+        return 1 + 2 + 2 + 1 + byteCount + 1; // + 1 for Unit Identifier;
     }
 
     @Override
     public ChannelBuffer encode() {
         ChannelBuffer buf = ChannelBuffers.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
+        buf.writeShort(startingAddress);
+        buf.writeShort(quantityOfOutputs);
         buf.writeByte(byteCount);
-        buf.writeBytes(coilStatus.toByteArray());
+        buf.writeBytes(outputsValue.toByteArray());
 
         return buf;
     }
 
     @Override
     public void decode(ChannelBuffer data) {
+        startingAddress = data.readUnsignedShort();
+        quantityOfOutputs = data.readUnsignedShort();
         byteCount = data.readUnsignedByte();
 
         byte[] coils = new byte[byteCount];
         data.readBytes(coils);
 
-        coilStatus = BitSet.valueOf(coils);
+        outputsValue = BitSet.valueOf(coils);
     }
 
     @Override
     public String toString() {
-        return "ReadCoilsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + coilStatus + '}';
+        return "WriteMultipleCoilsRequest{" + "startingAddress=" + startingAddress + ", quantityOfOutputs=" + quantityOfOutputs + ", byteCount=" + byteCount + ", outputsValue=" + outputsValue + '}';
     }
 }

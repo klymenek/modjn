@@ -15,6 +15,7 @@
  */
 package modbus.func;
 
+import java.util.BitSet;
 import modbus.model.ModbusFunction;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -23,60 +24,60 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadInputRegistersRequest extends ModbusFunction {
+public class ReadDiscreteInputsResponse extends ModbusFunction {
 
-    private int startingAddress; // 0x0000 to 0xFFFF
-    private int quantityOfInputRegisters; // 1 - 125
+    private short byteCount;
+    private BitSet inputStatus;
 
-    /*
-     * Constructor for Response
-     */
-    public ReadInputRegistersRequest() {
-        super(READ_INPUT_REGISTERS);
+    public ReadDiscreteInputsResponse() {
+        super(READ_DISCRETE_INPUTS);
     }
 
-    /*
-     * Constructor for Request
-     */
-    public ReadInputRegistersRequest(int startingAddress, int quantityOfInputRegisters) {
-        super(READ_INPUT_REGISTERS);
+    public ReadDiscreteInputsResponse(BitSet inputStatus) {
+        super(READ_DISCRETE_INPUTS);
 
-        this.startingAddress = startingAddress;
-        this.quantityOfInputRegisters = quantityOfInputRegisters;
-    }
-    
-    public int getStartingAddress() {
-        return startingAddress;
+        byte[] inputs = inputStatus.toByteArray();
+
+        // maximum of 2000 bits
+        if (inputs.length > 250) {
+            throw new IllegalArgumentException();
+        }
+
+        this.byteCount = (short) inputs.length;
+        this.inputStatus = inputStatus;
     }
 
-    public int getQuantityOfInputRegisters() {
-        return quantityOfInputRegisters;
+    public BitSet getInputStatus() {
+        return inputStatus;
     }
 
     @Override
     public int calculateLength() {
-        //Function Code + Quantity Of Coils + Starting Address, in Byte + 1 for Unit Identifier
-        return 1 + 2 + 2 + 1;
+        return 1 + 1 + byteCount + 1; // + 1 for Unit Identifier;
     }
 
     @Override
     public ChannelBuffer encode() {
         ChannelBuffer buf = ChannelBuffers.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
-        buf.writeShort(startingAddress);
-        buf.writeShort(quantityOfInputRegisters);
+        buf.writeByte(byteCount);
+        buf.writeBytes(inputStatus.toByteArray());
 
         return buf;
     }
 
     @Override
     public void decode(ChannelBuffer data) {
-        startingAddress = data.readUnsignedShort();
-        quantityOfInputRegisters = data.readUnsignedShort();
+        byteCount = data.readUnsignedByte();
+
+        byte[] inputs = new byte[byteCount];
+        data.readBytes(inputs);
+
+        inputStatus = BitSet.valueOf(inputs);
     }
 
     @Override
     public String toString() {
-        return "ReadInputRegistersRequest{" + "startingAddress=" + startingAddress + ", quantityOfInputRegisters=" + quantityOfInputRegisters + '}';
+        return "ReadDiscreteInputsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + inputStatus + '}';
     }
 }

@@ -15,7 +15,6 @@
  */
 package modbus.func;
 
-import java.util.BitSet;
 import modbus.model.ModbusFunction;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -24,31 +23,29 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadCoilsResponse extends ModbusFunction {
+public class ReadHoldingRegistersResponse extends ModbusFunction {
 
     private short byteCount;
-    private BitSet coilStatus;
+    private int[] registers;
 
-    public ReadCoilsResponse() {
-        super(READ_COILS);
+    public ReadHoldingRegistersResponse() {
+        super(READ_HOLDING_REGISTERS);
     }
 
-    public ReadCoilsResponse(BitSet coilStatus) {
-        super(READ_COILS);
+    public ReadHoldingRegistersResponse(int[] registers) {
+        super(READ_HOLDING_REGISTERS);
 
-        byte[] coils = coilStatus.toByteArray();
-
-        // maximum of 2000 bits
-        if (coils.length > 250) {
+        // maximum of 125 registers
+        if (registers.length > 125) {
             throw new IllegalArgumentException();
         }
 
-        this.byteCount = (short) coils.length;
-        this.coilStatus = coilStatus;
+        this.byteCount = (short) (registers.length * 2);
+        this.registers = registers;
     }
 
-    public BitSet getCoilStatus() {
-        return coilStatus;
+    public int[] getRegisters() {
+        return registers;
     }
 
     @Override
@@ -61,7 +58,10 @@ public class ReadCoilsResponse extends ModbusFunction {
         ChannelBuffer buf = ChannelBuffers.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
         buf.writeByte(byteCount);
-        buf.writeBytes(coilStatus.toByteArray());
+
+        for (int i = 0; i < registers.length; i++) {
+            buf.writeShort(registers[i]);
+        }
 
         return buf;
     }
@@ -70,14 +70,26 @@ public class ReadCoilsResponse extends ModbusFunction {
     public void decode(ChannelBuffer data) {
         byteCount = data.readUnsignedByte();
 
-        byte[] coils = new byte[byteCount];
-        data.readBytes(coils);
-
-        coilStatus = BitSet.valueOf(coils);
+        registers = new int[byteCount / 2];
+        for (int i = 0; i < registers.length; i++) {
+            registers[i] = data.readUnsignedShort();
+        }
     }
 
     @Override
     public String toString() {
-        return "ReadCoilsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + coilStatus + '}';
+        StringBuilder registersStr = new StringBuilder();
+        registersStr.append("{");
+        for (int i = 0; i < registers.length; i++) {
+            registersStr.append("register_");
+            registersStr.append(i);
+            registersStr.append("=");
+            registersStr.append(registers[i]);
+            registersStr.append(", ");
+        }
+        registersStr.delete(registersStr.length() - 2, registersStr.length());
+        registersStr.append("}");
+        
+        return "ReadHoldingRegistersResponse{" + "byteCount=" + byteCount + ", inputRegisters=" + registersStr + '}';
     }
 }

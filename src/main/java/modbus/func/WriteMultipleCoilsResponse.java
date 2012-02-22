@@ -23,34 +23,34 @@ import org.jboss.netty.buffer.ChannelBuffers;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadInputRegistersRequest extends ModbusFunction {
+public class WriteMultipleCoilsResponse extends ModbusFunction {
 
     private int startingAddress; // 0x0000 to 0xFFFF
-    private int quantityOfInputRegisters; // 1 - 125
+    private int quantityOfOutputs; // 1 - 2000 (0x07D0)
 
     /*
      * Constructor for Response
      */
-    public ReadInputRegistersRequest() {
-        super(READ_INPUT_REGISTERS);
+    public WriteMultipleCoilsResponse() {
+        super(WRITE_MULTIPLE_COILS);
     }
 
     /*
      * Constructor for Request
      */
-    public ReadInputRegistersRequest(int startingAddress, int quantityOfInputRegisters) {
-        super(READ_INPUT_REGISTERS);
+    public WriteMultipleCoilsResponse(int startingAddress, int quantityOfOutputs) {
+        super(WRITE_MULTIPLE_COILS);
 
         this.startingAddress = startingAddress;
-        this.quantityOfInputRegisters = quantityOfInputRegisters;
+        this.quantityOfOutputs = quantityOfOutputs;
     }
     
     public int getStartingAddress() {
         return startingAddress;
     }
 
-    public int getQuantityOfInputRegisters() {
-        return quantityOfInputRegisters;
+    public int getQuantityOfOutputs() {
+        return quantityOfOutputs;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ReadInputRegistersRequest extends ModbusFunction {
         ChannelBuffer buf = ChannelBuffers.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
         buf.writeShort(startingAddress);
-        buf.writeShort(quantityOfInputRegisters);
+        buf.writeShort(quantityOfOutputs);
 
         return buf;
     }
@@ -72,11 +72,11 @@ public class ReadInputRegistersRequest extends ModbusFunction {
     @Override
     public void decode(ChannelBuffer data) {
         startingAddress = data.readUnsignedShort();
-        quantityOfInputRegisters = data.readUnsignedShort();
+        quantityOfOutputs = data.readUnsignedShort();
     }
 
     @Override
     public String toString() {
-        return "ReadInputRegistersRequest{" + "startingAddress=" + startingAddress + ", quantityOfInputRegisters=" + quantityOfInputRegisters + '}';
+        return "WriteMultipleCoilsResponse{" + "startingAddress=" + startingAddress + ", quantityOfOutputs=" + quantityOfOutputs + '}';
     }
 }

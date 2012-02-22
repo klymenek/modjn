@@ -1,6 +1,7 @@
 package modbus.client;
 
 import java.net.InetSocketAddress;
+import java.util.BitSet;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import modbus.ModbusConstants;
@@ -9,8 +10,16 @@ import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
 import modbus.func.ReadCoilsRequest;
 import modbus.func.ReadCoilsResponse;
+import modbus.func.ReadDiscreteInputsRequest;
+import modbus.func.ReadDiscreteInputsResponse;
+import modbus.func.ReadHoldingRegistersRequest;
+import modbus.func.ReadHoldingRegistersResponse;
 import modbus.func.ReadInputRegistersRequest;
 import modbus.func.ReadInputRegistersResponse;
+import modbus.func.WriteMultipleCoilsRequest;
+import modbus.func.WriteMultipleCoilsResponse;
+import modbus.func.WriteMultipleRegistersRequest;
+import modbus.func.WriteMultipleRegistersResponse;
 import modbus.func.WriteSingleCoil;
 import modbus.func.WriteSingleRegister;
 import modbus.model.ModbusFrame;
@@ -88,33 +97,65 @@ public class ModbusTCPClient {
     public WriteSingleCoil writeCoil(int address, boolean state)
             throws NoResponseException, ErrorResponseException {
 
-        WriteSingleCoil wc = new WriteSingleCoil(address, state);
+        WriteSingleCoil wsc = new WriteSingleCoil(address, state);
 
-        return (WriteSingleCoil) callModbusFunction(wc);
+        return (WriteSingleCoil) callModbusFunction(wsc);
     }
 
     public WriteSingleRegister writeRegister(int address, int value)
             throws NoResponseException, ErrorResponseException {
 
-        WriteSingleRegister wr = new WriteSingleRegister(address, value);
+        WriteSingleRegister wsr = new WriteSingleRegister(address, value);
 
-        return (WriteSingleRegister) callModbusFunction(wr);
+        return (WriteSingleRegister) callModbusFunction(wsr);
     }
 
     public ReadCoilsResponse readCoils(int startAddress, int quantityOfCoils)
             throws NoResponseException, ErrorResponseException {
 
-        ReadCoilsRequest rr = new ReadCoilsRequest(startAddress, quantityOfCoils);
+        ReadCoilsRequest rcr = new ReadCoilsRequest(startAddress, quantityOfCoils);
 
-        return (ReadCoilsResponse) callModbusFunction(rr);
+        return (ReadCoilsResponse) callModbusFunction(rcr);
+    }
+
+    public ReadDiscreteInputsResponse readDiscreteInputs(int startAddress, int quantityOfCoils)
+            throws NoResponseException, ErrorResponseException {
+
+        ReadDiscreteInputsRequest rdir = new ReadDiscreteInputsRequest(startAddress, quantityOfCoils);
+
+        return (ReadDiscreteInputsResponse) callModbusFunction(rdir);
     }
 
     public ReadInputRegistersResponse readInputRegisters(int startAddress, int quantityOfInputRegisters)
             throws NoResponseException, ErrorResponseException {
 
-        ReadInputRegistersRequest rir = new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters);
+        ReadInputRegistersRequest rirr = new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters);
 
-        return (ReadInputRegistersResponse) callModbusFunction(rir);
+        return (ReadInputRegistersResponse) callModbusFunction(rirr);
+    }
+
+    public ReadHoldingRegistersResponse readHoldingRegisters(int startAddress, int quantityOfInputRegisters)
+            throws NoResponseException, ErrorResponseException {
+
+        ReadHoldingRegistersRequest rhrr = new ReadHoldingRegistersRequest(startAddress, quantityOfInputRegisters);
+
+        return (ReadHoldingRegistersResponse) callModbusFunction(rhrr);
+    }
+
+    public WriteMultipleCoilsResponse writeMultipleCoils(int address, int quantityOfOutputs, BitSet outputsValue)
+            throws NoResponseException, ErrorResponseException {
+
+        WriteMultipleCoilsRequest wmcr = new WriteMultipleCoilsRequest(address, quantityOfOutputs, outputsValue);
+
+        return (WriteMultipleCoilsResponse) callModbusFunction(wmcr);
+    }
+
+    public WriteMultipleRegistersResponse writeMultipleRegisters(int address, int quantityOfRegisters, int[] registers)
+            throws NoResponseException, ErrorResponseException {
+
+        WriteMultipleRegistersRequest wmrr = new WriteMultipleRegistersRequest(address, quantityOfRegisters, registers);
+
+        return (WriteMultipleRegistersResponse) callModbusFunction(wmrr);
     }
 
     public void close() {
@@ -162,7 +203,7 @@ public class ModbusTCPClient {
 
         ReadCoilsResponse readCoils = client.readCoils(12321, 5);
         System.out.println(readCoils);
-        
+
         ReadInputRegistersResponse readInputRegisters = client.readInputRegisters(12321, 6);
         System.out.println(readInputRegisters);
 

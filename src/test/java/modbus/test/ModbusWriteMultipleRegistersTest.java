@@ -20,6 +20,7 @@ import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
 import modbus.func.ReadInputRegistersResponse;
+import modbus.func.WriteMultipleRegistersResponse;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +31,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusReadInputRegistersTest {
+public class ModbusWriteMultipleRegistersTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -47,12 +48,19 @@ public class ModbusReadInputRegistersTest {
     }
 
     @Test
-    public void testReadInputRegisters() throws NoResponseException, ErrorResponseException {
-        ReadInputRegistersResponse readInputRegisters = modbusClient.readInputRegisters(12321, 10);
+    public void testWriteMultipleRegisters() throws NoResponseException, ErrorResponseException {
+        int quantityOfRegisters = 10;
 
-        assertNotNull(readInputRegisters);
+        int[] registers = new int[quantityOfRegisters];
+        registers[0] = 0xFFFF;
+        registers[1] = 0xF0F0;
+        registers[2] = 0x0F0F;
 
-        System.out.println(readInputRegisters);
+        WriteMultipleRegistersResponse writeMultipleRegisters = modbusClient.writeMultipleRegisters(12321, quantityOfRegisters, registers);
+
+        assertNotNull(writeMultipleRegisters);
+
+        System.out.println(writeMultipleRegisters);
     }
 
     @After

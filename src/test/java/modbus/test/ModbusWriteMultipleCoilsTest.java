@@ -15,11 +15,13 @@
  */
 package modbus.test;
 
+import java.util.BitSet;
 import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
 import modbus.func.ReadInputRegistersResponse;
+import modbus.func.WriteMultipleCoilsResponse;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +32,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusReadInputRegistersTest {
+public class ModbusWriteMultipleCoilsTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -47,12 +49,19 @@ public class ModbusReadInputRegistersTest {
     }
 
     @Test
-    public void testReadInputRegisters() throws NoResponseException, ErrorResponseException {
-        ReadInputRegistersResponse readInputRegisters = modbusClient.readInputRegisters(12321, 10);
+    public void testWriteMultipleCoils() throws NoResponseException, ErrorResponseException {
+        int quantityOfCoils = 10;
 
-        assertNotNull(readInputRegisters);
+        BitSet coils = new BitSet(quantityOfCoils);
+        coils.set(0);
+        coils.set(5);
+        coils.set(8);
 
-        System.out.println(readInputRegisters);
+        WriteMultipleCoilsResponse writeMultipleCoils = modbusClient.writeMultipleCoils(12321, quantityOfCoils, coils);
+
+        assertNotNull(writeMultipleCoils);
+
+        System.out.println(writeMultipleCoils);
     }
 
     @After

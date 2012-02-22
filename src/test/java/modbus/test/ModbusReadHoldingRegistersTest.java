@@ -19,7 +19,7 @@ import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
-import modbus.func.ReadInputRegistersResponse;
+import modbus.func.ReadHoldingRegistersResponse;
 import modbus.server.ModbusTCPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
@@ -30,7 +30,7 @@ import org.junit.Test;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ModbusReadInputRegistersTest {
+public class ModbusReadHoldingRegistersTest {
 
     ModbusTCPClient modbusClient;
     ModbusTCPServer modbusServer;
@@ -47,12 +47,12 @@ public class ModbusReadInputRegistersTest {
     }
 
     @Test
-    public void testReadInputRegisters() throws NoResponseException, ErrorResponseException {
-        ReadInputRegistersResponse readInputRegisters = modbusClient.readInputRegisters(12321, 10);
+    public void testReadHoldingRegisters() throws NoResponseException, ErrorResponseException {
+        ReadHoldingRegistersResponse readHoldingRegisters = modbusClient.readHoldingRegisters(12321, 10);
 
-        assertNotNull(readInputRegisters);
+        assertNotNull(readHoldingRegisters);
 
-        System.out.println(readInputRegisters);
+        System.out.println(readHoldingRegisters);
     }
 
     @After

@@ -44,6 +44,10 @@ public class ReadInputRegistersResponse extends ModbusFunction {
         this.inputRegisters = inputRegisters;
     }
 
+    public int[] getInputRegisters() {
+        return inputRegisters;
+    }
+
     @Override
     public int calculateLength() {
         return 1 + 1 + byteCount + 1; // + 1 for Unit Identifier;
