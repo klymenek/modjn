@@ -17,11 +17,12 @@ package modbus.test;
 
 import modbus.ModbusConstants;
 import modbus.client.ModbusTCPClient;
+import modbus.client.ModbusUDPClient;
 import modbus.exception.ErrorResponseException;
 import modbus.exception.NoResponseException;
-import modbus.func.ReadInputRegistersResponse;
 import modbus.func.WriteMultipleRegistersResponse;
 import modbus.server.ModbusTCPServer;
+import modbus.server.ModbusUDPServer;
 import org.junit.After;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
@@ -33,22 +34,46 @@ import org.junit.Test;
  */
 public class ModbusWriteMultipleRegistersTest {
 
-    ModbusTCPClient modbusClient;
-    ModbusTCPServer modbusServer;
+    ModbusTCPClient modbusTCPClient;
+    ModbusTCPServer modbusTCPServer;
+    ModbusUDPClient modbusUDPClient;
+    ModbusUDPServer modbusUDPServer;
 
     @Before
     public void setUp() throws Exception {
-        modbusServer = new ModbusTCPServer(ModbusConstants.MODBUS_DEFAULT_PORT);
-        modbusServer.run();
+        //TCP
+//        modbusTCPServer = new ModbusTCPServer(ModbusConstants.MODBUS_DEFAULT_PORT);
+//        modbusTCPServer.run();
+//
+//        modbusTCPClient = new ModbusTCPClient("localhost", ModbusConstants.MODBUS_DEFAULT_PORT);
+//        modbusTCPClient.run();
 
-        modbusClient = new ModbusTCPClient("localhost" /*
-                 * "192.168.1.55"
-                 */, ModbusConstants.MODBUS_DEFAULT_PORT);
-        modbusClient.run();
+        //UDP
+        modbusUDPServer = new ModbusUDPServer(ModbusConstants.MODBUS_DEFAULT_PORT);
+        modbusUDPServer.run();
+
+        modbusUDPClient = new ModbusUDPClient("localhost", ModbusConstants.MODBUS_DEFAULT_PORT);
+        modbusUDPClient.run();
     }
 
+//    @Test
+//    public void testWriteMultipleRegistersTCP() throws NoResponseException, ErrorResponseException {
+//        int quantityOfRegisters = 10;
+//
+//        int[] registers = new int[quantityOfRegisters];
+//        registers[0] = 0xFFFF;
+//        registers[1] = 0xF0F0;
+//        registers[2] = 0x0F0F;
+//
+//        WriteMultipleRegistersResponse writeMultipleRegisters = modbusTCPClient.writeMultipleRegisters(12321, quantityOfRegisters, registers);
+//
+//        assertNotNull(writeMultipleRegisters);
+//
+//        System.out.println(writeMultipleRegisters);
+//    }
+
     @Test
-    public void testWriteMultipleRegisters() throws NoResponseException, ErrorResponseException {
+    public void testWriteMultipleRegistersUDP() throws NoResponseException, ErrorResponseException {
         int quantityOfRegisters = 10;
 
         int[] registers = new int[quantityOfRegisters];
@@ -56,7 +81,7 @@ public class ModbusWriteMultipleRegistersTest {
         registers[1] = 0xF0F0;
         registers[2] = 0x0F0F;
 
-        WriteMultipleRegistersResponse writeMultipleRegisters = modbusClient.writeMultipleRegisters(12321, quantityOfRegisters, registers);
+        WriteMultipleRegistersResponse writeMultipleRegisters = modbusUDPClient.writeMultipleRegisters(12321, quantityOfRegisters, registers);
 
         assertNotNull(writeMultipleRegisters);
 
@@ -65,8 +90,10 @@ public class ModbusWriteMultipleRegistersTest {
 
     @After
     public void tearDown() throws Exception {
-        modbusClient.close();
-
-        modbusServer.close();
+//        modbusTCPClient.close();
+//        modbusTCPServer.close();
+        
+        modbusUDPClient.close();
+        modbusUDPServer.close();
     }
 }

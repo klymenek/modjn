@@ -21,8 +21,8 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
  */
 public class ModbusClientHandler extends SimpleChannelUpstreamHandler {
 
-    static final Logger logger = Logger.getLogger(ModbusClientHandler.class.getSimpleName());
-    final Map<Integer, ModbusFrame> responses = new HashMap<Integer, ModbusFrame>(ModbusConstants.TRANSACTION_COUNTER_RESET);
+    private static final Logger logger = Logger.getLogger(ModbusClientHandler.class.getSimpleName());
+    private final Map<Integer, ModbusFrame> responses = new HashMap<Integer, ModbusFrame>(ModbusConstants.TRANSACTION_COUNTER_RESET);
 
     public ModbusFrame getResponse(int transactionIdentifier)
             throws NoResponseException, ErrorResponseException {

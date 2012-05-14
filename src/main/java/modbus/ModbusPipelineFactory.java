@@ -19,14 +19,17 @@ public class ModbusPipelineFactory implements
     private final ChannelHandler MODBUS_DECODER;
     
     private final boolean server;
+    private final boolean connectionLess;
 
-    public ModbusPipelineFactory(boolean server) {
+    public ModbusPipelineFactory(boolean server, boolean connectionLess) {
         MODBUS_ENCODER = new ModbusEncoder();
         MODBUS_DECODER = new ModbusDecoder(server);
         
         this.server = server;
+        this.connectionLess = connectionLess;
     }
     
+    @Override
     public ChannelPipeline getPipeline() throws Exception {
         ChannelPipeline pipeline = Channels.pipeline();
 
@@ -50,7 +53,7 @@ public class ModbusPipelineFactory implements
 
         // and then business logic.
         if(server) {
-            pipeline.addLast("handler", new ModbusServerHandler());
+            pipeline.addLast("handler", new ModbusServerHandler(connectionLess));
         } else {    
             pipeline.addLast("handler", new ModbusClientHandler());
         }

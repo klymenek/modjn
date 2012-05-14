@@ -32,11 +32,21 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
  */
 public class ModbusServerHandler extends SimpleChannelUpstreamHandler {
 
-    static final Logger logger = Logger.getLogger(ModbusServerHandler.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ModbusServerHandler.class.getSimpleName());
+    private final boolean connectionLess;
+
+    public ModbusServerHandler(boolean connectionLess) {
+        this.connectionLess = connectionLess;
+    }
 
     @Override
     public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        ModbusTCPServer.allChannels.add(e.getChannel());
+        //TODO unabhaeging von Protokoll
+        if (connectionLess) {
+            ModbusUDPServer.allChannels.add(e.getChannel());
+        } else {
+            ModbusTCPServer.allChannels.add(e.getChannel());
+        }
     }
 
     @Override

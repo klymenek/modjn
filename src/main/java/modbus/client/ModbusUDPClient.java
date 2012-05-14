@@ -25,34 +25,32 @@ import modbus.func.WriteSingleRegister;
 import modbus.model.ModbusFrame;
 import modbus.model.ModbusFunction;
 import modbus.model.ModbusHeader;
-import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 
-public class ModbusTCPClient {
+public class ModbusUDPClient {
 
-    private static final Logger logger = Logger.getLogger(ModbusTCPClient.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ModbusUDPClient.class.getSimpleName());
     private final String host;
     private final int port;
     private int lastTransactionIdentifier = 0;
     private Channel channel;
-    private ClientBootstrap bootstrap;
+    private ConnectionlessBootstrap bootstrap;
 
-    public ModbusTCPClient(String host, int port) {
+    public ModbusUDPClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
     public void run() {
         // Configure the client.
-        bootstrap = new ClientBootstrap(
-                new NioClientSocketChannelFactory(
-                Executors.newCachedThreadPool(),
+        bootstrap = new ConnectionlessBootstrap(new NioDatagramChannelFactory(
                 Executors.newCachedThreadPool()));
 
         // Configure the pipeline factory.
-        bootstrap.setPipelineFactory(new ModbusPipelineFactory(false, false));
+        bootstrap.setPipelineFactory(new ModbusPipelineFactory(false, true));
 
         // Start the connection attempt.
         ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));

@@ -5,36 +5,34 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import modbus.ModbusConstants;
 import modbus.ModbusPipelineFactory;
-import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 
-public class ModbusTCPServer {
+public class ModbusUDPServer {
 
-    private static final Logger logger = Logger.getLogger(ModbusTCPServer.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ModbusUDPServer.class.getSimpleName());
     private final int port;
-    private ServerBootstrap bootstrap;
+    private ConnectionlessBootstrap bootstrap;
     public static final ChannelGroup allChannels = new DefaultChannelGroup("server");
 
-    public ModbusTCPServer(int port) {
+    public ModbusUDPServer(int port) {
         this.port = port;
     }
 
     public void run() {
         // Configure the client.
-        bootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
+        bootstrap = new ConnectionlessBootstrap(new NioDatagramChannelFactory(
                 Executors.newCachedThreadPool()));
 
         // Configure the pipeline factory.
-        bootstrap.setPipelineFactory(new ModbusPipelineFactory(true, false));
+        bootstrap.setPipelineFactory(new ModbusPipelineFactory(true, true));
 
-        bootstrap.setOption("child.tcpNoDelay", true);
-        bootstrap.setOption("child.keepAlive", true);
+//        bootstrap.setOption("child.tcpNoDelay", true);
+//        bootstrap.setOption("child.keepAlive", true);
 
         Channel parentChannel = bootstrap.bind(new InetSocketAddress(port));
 
@@ -44,7 +42,7 @@ public class ModbusTCPServer {
     public void close() {
         ChannelGroupFuture future = allChannels.close();
         future.awaitUninterruptibly();
-        
+
         // Shut down all thread pools to exit.
         bootstrap.releaseExternalResources();
     }
@@ -55,7 +53,7 @@ public class ModbusTCPServer {
         // Print usage if no argument is specified.
         if (args.length != 2) {
             System.err.println(
-                    "Usage: " + ModbusTCPServer.class.getSimpleName()
+                    "Usage: " + ModbusUDPServer.class.getSimpleName()
                     + " <port>");
             System.err.println(
                     "Default Usage: <port> = "
@@ -67,7 +65,7 @@ public class ModbusTCPServer {
             port = Integer.parseInt(args[1]);
         }
 
-        ModbusTCPServer modbusServer = new ModbusTCPServer(port);
+        ModbusUDPServer modbusServer = new ModbusUDPServer(port);
         modbusServer.run();
     }
 }
