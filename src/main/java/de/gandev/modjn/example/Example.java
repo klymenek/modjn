@@ -1,10 +1,12 @@
 package de.gandev.modjn.example;
 
-import de.gandev.modjn.communication.ModbusClient;
-import de.gandev.modjn.communication.ModbusServer;
+import de.gandev.modjn.ModbusClient;
+import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.ReadCoilsResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,11 +14,16 @@ import de.gandev.modjn.entity.func.ReadCoilsResponse;
  */
 public class Example {
 
-    public static void main(String[] args) throws NoResponseException, ErrorResponseException {
-        ModbusClient modbusClient = ClientAndServer.getInstance().getModbusClient();
-        ModbusServer modbusServer = ClientAndServer.getInstance().getModbusServer();
+    public static void main(String[] args) {
+        ModbusClient modbusClient = ClientAndServerForTests.getInstance().getModbusClient();
+        ModbusServer modbusServer = ClientAndServerForTests.getInstance().getModbusServer();
 
-        ReadCoilsResponse readCoils = modbusClient.readCoils(12321, 10);
+        ReadCoilsResponse readCoils = null;
+        try {
+            readCoils = modbusClient.readCoils(12321, 10);
+        } catch (NoResponseException | ErrorResponseException ex) {
+            Logger.getLogger(Example.class.getName()).log(Level.SEVERE, null, ex);
+        }
         System.out.println(readCoils);
 
         modbusServer.close();

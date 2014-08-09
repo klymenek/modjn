@@ -1,5 +1,6 @@
-package de.gandev.modjn;
+package de.gandev.modjn.handler;
 
+import de.gandev.modjn.ModbusConstants;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -10,13 +11,19 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  *
  * @author ag
  */
-public abstract class ModbusChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class ModbusChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private final ChannelHandler MODBUS_ENCODER;
     protected ChannelHandler MODBUS_DECODER;
+    //
+    private final ModbusRequestHandler handler;
 
-    public ModbusChannelInitializer() {
+    public ModbusChannelInitializer(ModbusRequestHandler handler) {
         MODBUS_ENCODER = new ModbusEncoder();
+
+        this.handler = handler;
+
+        MODBUS_DECODER = new ModbusDecoder(handler != null);
     }
 
     @Override
@@ -40,5 +47,11 @@ public abstract class ModbusChannelInitializer extends ChannelInitializer<Socket
         //Modbus encoder, decoder
         pipeline.addLast("encoder", MODBUS_ENCODER);
         pipeline.addLast("decoder", MODBUS_DECODER);
+
+        if (handler != null) {
+            pipeline.addLast("requestHandler", handler);
+        } else {
+            pipeline.addLast("responseHandler", new ModbusResponseHandler());
+        }
     }
 }

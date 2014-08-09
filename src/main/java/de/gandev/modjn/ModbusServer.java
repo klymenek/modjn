@@ -1,6 +1,7 @@
-package de.gandev.modjn.communication;
+package de.gandev.modjn;
 
-import de.gandev.modjn.ModbusServerChannelInitializer;
+import de.gandev.modjn.handler.ModbusChannelInitializer;
+import de.gandev.modjn.handler.ModbusRequestHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -20,9 +21,9 @@ public class ModbusServer {
     private final int port;
     private ServerBootstrap bootstrap;
     public static final ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private final ModbusServerHandler handler;
+    private final ModbusRequestHandler handler;
 
-    public ModbusServer(int port, ModbusServerHandler handler) {
+    public ModbusServer(int port, ModbusRequestHandler handler) {
         this.port = port;
         this.handler = handler;
     }
@@ -39,7 +40,7 @@ public class ModbusServer {
                     bootstrap = new ServerBootstrap();
                     bootstrap.group(bossGroup, workerGroup)
                             .channel(NioServerSocketChannel.class)
-                            .childHandler(new ModbusServerChannelInitializer(handler))
+                            .childHandler(new ModbusChannelInitializer(handler))
                             .option(ChannelOption.SO_BACKLOG, 128)
                             .childOption(ChannelOption.SO_KEEPALIVE, true);
 
@@ -62,7 +63,6 @@ public class ModbusServer {
         };
 
         Thread serverThread = new Thread(r);
-        serverThread.setDaemon(true);
         serverThread.start();
     }
 

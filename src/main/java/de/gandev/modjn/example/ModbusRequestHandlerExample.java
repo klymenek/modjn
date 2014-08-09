@@ -1,6 +1,6 @@
 package de.gandev.modjn.example;
 
-import de.gandev.modjn.communication.ModbusServerHandler;
+import de.gandev.modjn.handler.ModbusRequestHandler;
 import de.gandev.modjn.entity.func.ReadCoilsRequest;
 import de.gandev.modjn.entity.func.ReadCoilsResponse;
 import de.gandev.modjn.entity.func.ReadDiscreteInputsRequest;
@@ -21,7 +21,7 @@ import java.util.BitSet;
  *
  * @author ares
  */
-public class ModbusServerHandlerExample extends ModbusServerHandler {
+public class ModbusRequestHandlerExample extends ModbusRequestHandler {
 
     @Override
     protected WriteSingleCoil writeSingleCoil(WriteSingleCoil request) {

@@ -1,7 +1,5 @@
-package de.gandev.modjn.communication;
+package de.gandev.modjn;
 
-import de.gandev.modjn.ModbusClientChannelInitializer;
-import de.gandev.modjn.ModbusConstants;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
@@ -21,6 +19,8 @@ import de.gandev.modjn.entity.func.WriteMultipleRegistersRequest;
 import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
+import de.gandev.modjn.handler.ModbusChannelInitializer;
+import de.gandev.modjn.handler.ModbusResponseHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -64,7 +64,7 @@ public class ModbusClient {
                     bootstrap.group(workerGroup);
                     bootstrap.channel(NioSocketChannel.class);
                     bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-                    bootstrap.handler(new ModbusClientChannelInitializer());
+                    bootstrap.handler(new ModbusChannelInitializer(null));
 
                     // Start the client.
                     ChannelFuture f = bootstrap.connect(host, port).sync();
@@ -82,7 +82,6 @@ public class ModbusClient {
         };
 
         Thread clientThread = new Thread(r);
-        clientThread.setDaemon(true);
         clientThread.start();
     }
 
@@ -107,7 +106,7 @@ public class ModbusClient {
         ModbusFrame frame = new ModbusFrame(header, function);
         channel.writeAndFlush(frame);
 
-        ModbusClientHandler handler = (ModbusClientHandler) channel.pipeline().get("handler");
+        ModbusResponseHandler handler = (ModbusResponseHandler) channel.pipeline().get("responseHandler");
 
         return handler.getResponse(transactionId).getFunction();
     }

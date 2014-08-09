@@ -1,4 +1,4 @@
-package de.gandev.modjn.communication;
+package de.gandev.modjn.handler;
 
 import de.gandev.modjn.ModbusConstants;
 import de.gandev.modjn.entity.ModbusFrame;
@@ -15,9 +15,9 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-public class ModbusClientHandler extends SimpleChannelInboundHandler<Object> {
+public class ModbusResponseHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = Logger.getLogger(ModbusClientHandler.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ModbusResponseHandler.class.getSimpleName());
     private final Map<Integer, ModbusFrame> responses = new HashMap<>(ModbusConstants.TRANSACTION_COUNTER_RESET);
 
     public ModbusFrame getResponse(int transactionIdentifier)

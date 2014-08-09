@@ -1,4 +1,4 @@
-package de.gandev.modjn;
+package de.gandev.modjn.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;

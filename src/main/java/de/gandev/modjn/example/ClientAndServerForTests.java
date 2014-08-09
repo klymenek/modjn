@@ -1,19 +1,19 @@
 package de.gandev.modjn.example;
 
-import de.gandev.modjn.communication.ModbusClient;
-import de.gandev.modjn.communication.ModbusServer;
+import de.gandev.modjn.ModbusClient;
+import de.gandev.modjn.ModbusServer;
 
 /**
  *
  * @author ares
  */
-public class ClientAndServer {
+public class ClientAndServerForTests {
 
     private final ModbusClient modbusClient;
     private final ModbusServer modbusServer;
 
-    private ClientAndServer() {
-        modbusServer = new ModbusServer(30502, new ModbusServerHandlerExample()); //ModbusConstants.MODBUS_DEFAULT_PORT);
+    private ClientAndServerForTests() {
+        modbusServer = new ModbusServer(30502, new ModbusRequestHandlerExample()); //ModbusConstants.MODBUS_DEFAULT_PORT);
         modbusServer.run();
 
         modbusClient = new ModbusClient("localhost" /*
@@ -39,12 +39,12 @@ public class ClientAndServer {
         modbusServer.close();
     }
 
-    public static ClientAndServer getInstance() {
+    public static ClientAndServerForTests getInstance() {
         return ClientAndServerHolder.INSTANCE;
     }
 
     private static class ClientAndServerHolder {
 
-        private static final ClientAndServer INSTANCE = new ClientAndServer();
+        private static final ClientAndServerForTests INSTANCE = new ClientAndServerForTests();
     }
 }

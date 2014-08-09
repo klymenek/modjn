@@ -1,11 +1,9 @@
-package de.gandev.modjn;
+package de.gandev.modjn.handler;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.EmptyByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.CorruptedFrameException;
-import java.util.List;
+import static de.gandev.modjn.ModbusConstants.MBAP_LENGTH;
+import de.gandev.modjn.entity.ModbusFrame;
+import de.gandev.modjn.entity.ModbusFunction;
+import de.gandev.modjn.entity.ModbusHeader;
 import de.gandev.modjn.entity.func.ModbusError;
 import de.gandev.modjn.entity.func.ReadCoilsRequest;
 import de.gandev.modjn.entity.func.ReadCoilsResponse;
@@ -21,9 +19,10 @@ import de.gandev.modjn.entity.func.WriteMultipleRegistersRequest;
 import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
-import de.gandev.modjn.entity.ModbusFrame;
-import de.gandev.modjn.entity.ModbusFunction;
-import de.gandev.modjn.entity.ModbusHeader;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import java.util.List;
 
 /**
  *
@@ -31,15 +30,15 @@ import de.gandev.modjn.entity.ModbusHeader;
  */
 public class ModbusDecoder extends ByteToMessageDecoder {
 
-    private final boolean server;
+    private final boolean serverMode;
 
-    public ModbusDecoder(boolean server) {
-        this.server = server;
+    public ModbusDecoder(boolean serverMode) {
+        this.serverMode = serverMode;
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
-        if (buffer instanceof EmptyByteBuf) {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) {
+        if (buffer.capacity() < MBAP_LENGTH + 1 /*Function Code*/) {
             return;
         }
 
@@ -53,28 +52,28 @@ public class ModbusDecoder extends ByteToMessageDecoder {
         ModbusFunction function = null;
         switch (functionCode) {
             case ModbusFunction.READ_COILS:
-                if (server) {
+                if (serverMode) {
                     function = new ReadCoilsRequest();
                 } else {
                     function = new ReadCoilsResponse();
                 }
                 break;
             case ModbusFunction.READ_DISCRETE_INPUTS:
-                if (server) {
+                if (serverMode) {
                     function = new ReadDiscreteInputsRequest();
                 } else {
                     function = new ReadDiscreteInputsResponse();
                 }
                 break;
             case ModbusFunction.READ_INPUT_REGISTERS:
-                if (server) {
+                if (serverMode) {
                     function = new ReadInputRegistersRequest();
                 } else {
                     function = new ReadInputRegistersResponse();
                 }
                 break;
             case ModbusFunction.READ_HOLDING_REGISTERS:
-                if (server) {
+                if (serverMode) {
                     function = new ReadHoldingRegistersRequest();
                 } else {
                     function = new ReadHoldingRegistersResponse();
@@ -87,14 +86,14 @@ public class ModbusDecoder extends ByteToMessageDecoder {
                 function = new WriteSingleRegister();
                 break;
             case ModbusFunction.WRITE_MULTIPLE_COILS:
-                if (server) {
+                if (serverMode) {
                     function = new WriteMultipleCoilsRequest();
                 } else {
                     function = new WriteMultipleCoilsResponse();
                 }
                 break;
             case ModbusFunction.WRITE_MULTIPLE_REGISTERS:
-                if (server) {
+                if (serverMode) {
                     function = new WriteMultipleRegistersRequest();
                 } else {
                     function = new WriteMultipleRegistersResponse();
@@ -105,8 +104,7 @@ public class ModbusDecoder extends ByteToMessageDecoder {
         if (ModbusFunction.isError(functionCode)) {
             function = new ModbusError(functionCode);
         } else if (function == null) {
-            throw new CorruptedFrameException(
-                    "Invalid Function Code: " + functionCode);
+            function = new ModbusError(functionCode, (short) 1);
         }
 
         function.decode(buffer.readBytes(buffer.readableBytes()));

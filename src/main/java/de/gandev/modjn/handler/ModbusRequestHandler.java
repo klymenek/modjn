@@ -1,9 +1,9 @@
-package de.gandev.modjn.communication;
+package de.gandev.modjn.handler;
 
+import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
-import de.gandev.modjn.entity.func.ModbusError;
 import de.gandev.modjn.entity.func.ReadCoilsRequest;
 import de.gandev.modjn.entity.func.ReadCoilsResponse;
 import de.gandev.modjn.entity.func.ReadDiscreteInputsRequest;
@@ -27,9 +27,9 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-public abstract class ModbusServerHandler extends SimpleChannelInboundHandler<Object> {
+public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = Logger.getLogger(ModbusServerHandler.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ModbusRequestHandler.class.getSimpleName());
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -92,7 +92,7 @@ public abstract class ModbusServerHandler extends SimpleChannelInboundHandler<Ob
 
                 response = writeMultipleCoilsRequest(request);
             } else {
-                response = new ModbusError(function.getFunctionCode(), (short) 1);
+                throw new UnsupportedOperationException("Function not supported!");
             }
 
             ModbusHeader header = new ModbusHeader(
