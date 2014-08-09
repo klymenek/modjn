@@ -1,9 +1,9 @@
 package de.gandev.modjn.handler;
 
+import de.gandev.modjn.entity.ModbusFrame;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import de.gandev.modjn.entity.ModbusFrame;
 
 /**
  *

@@ -92,6 +92,10 @@ public class ModbusClient {
     public ModbusFunction callModbusFunction(ModbusFunction function)
             throws NoResponseException, ErrorResponseException {
 
+        if (channel == null) {
+            return null;
+        }
+
         int transactionId = calculateTransactionIdentifier();
         int protocolId = 0;
         //length of the Function in byte
@@ -102,6 +106,9 @@ public class ModbusClient {
         channel.writeAndFlush(frame);
 
         ModbusResponseHandler handler = (ModbusResponseHandler) channel.pipeline().get("responseHandler");
+        if (handler == null) {
+            return null;
+        }
 
         return handler.getResponse(transactionId).getFunction();
     }
@@ -175,6 +182,8 @@ public class ModbusClient {
     }
 
     public void close() {
-        channel.close().awaitUninterruptibly();
+        if (channel != null) {
+            channel.close().awaitUninterruptibly();
+        }
     }
 }
