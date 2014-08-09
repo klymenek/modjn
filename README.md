@@ -1,13 +1,14 @@
 modjn
 =====
 
-Modbus Implementation in Java with Netty
+Modbus TCP client/server implementation in Java with Netty 4.x
 
 ## usage
 
 ### server
 
-*   implement ModbusRequestHandler for server business logic, example ...
+implement ModbusRequestHandler for server business logic, example [here...](https://github.com/klymenek/modjn/blob/master/src/main/java/de/gandev/modjn/example/ModbusRequestHandlerExample.java)
+    
 
     ModbusServer modbusServer = new ModbusServer(ModbusConstants.MODBUS_DEFAULT_PORT, new ModbusRequestHandler());
     modbusServer.setup();
