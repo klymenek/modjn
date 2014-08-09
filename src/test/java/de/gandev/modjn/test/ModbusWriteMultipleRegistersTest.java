@@ -15,12 +15,13 @@
  */
 package de.gandev.modjn.test;
 
-import de.gandev.modjn.example.ClientAndServerForTests;
 import de.gandev.modjn.ModbusClient;
+import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
-import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.example.ClientForTests;
+import de.gandev.modjn.example.ServerForTests;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +37,8 @@ public class ModbusWriteMultipleRegistersTest {
 
     @Before
     public void setUp() throws Exception {
-        modbusServer = ClientAndServerForTests.getInstance().getModbusServer();
-        modbusClient = ClientAndServerForTests.getInstance().getModbusClient();
+        modbusServer = ServerForTests.getInstance().getModbusServer();
+        modbusClient = ClientForTests.getInstance().getModbusClient();
     }
 
     @Test

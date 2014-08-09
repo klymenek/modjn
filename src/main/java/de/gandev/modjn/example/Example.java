@@ -15,8 +15,8 @@ import java.util.logging.Logger;
 public class Example {
 
     public static void main(String[] args) {
-        ModbusClient modbusClient = ClientAndServerForTests.getInstance().getModbusClient();
-        ModbusServer modbusServer = ClientAndServerForTests.getInstance().getModbusServer();
+        ModbusServer modbusServer = ServerForTests.getInstance().getModbusServer();
+        ModbusClient modbusClient = ClientForTests.getInstance().getModbusClient();
 
         ReadCoilsResponse readCoils = null;
         try {
@@ -24,8 +24,10 @@ public class Example {
         } catch (NoResponseException | ErrorResponseException ex) {
             Logger.getLogger(Example.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         System.out.println(readCoils);
 
+        modbusClient.close();
         modbusServer.close();
     }
 }

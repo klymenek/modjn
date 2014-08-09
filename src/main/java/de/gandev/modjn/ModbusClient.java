@@ -28,6 +28,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.GenericFutureListener;
 import java.util.BitSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,37 +53,31 @@ public class ModbusClient {
         this.unitId = unitId;
     }
 
-    public void run() {
-        Runnable r = new Runnable() {
+    public void setup() {
+        try {
+            final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-            @Override
-            public void run() {
-                EventLoopGroup workerGroup = new NioEventLoopGroup();
+            bootstrap = new Bootstrap();
+            bootstrap.group(workerGroup);
+            bootstrap.channel(NioSocketChannel.class);
+            bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+            bootstrap.handler(new ModbusChannelInitializer(null));
 
-                try {
-                    bootstrap = new Bootstrap();
-                    bootstrap.group(workerGroup);
-                    bootstrap.channel(NioSocketChannel.class);
-                    bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-                    bootstrap.handler(new ModbusChannelInitializer(null));
+            ChannelFuture f = bootstrap.connect(host, port).sync();
 
-                    // Start the client.
-                    ChannelFuture f = bootstrap.connect(host, port).sync();
+            channel = f.channel();
 
-                    channel = f.channel();
+            channel.closeFuture().addListener(new GenericFutureListener<ChannelFuture>() {
 
-                    // Wait until the connection is closed.
-                    f.channel().closeFuture().sync();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(ModbusClient.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
                     workerGroup.shutdownGracefully();
                 }
-            }
-        };
+            });
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ModbusClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        Thread clientThread = new Thread(r);
-        clientThread.start();
     }
 
     private synchronized int calculateTransactionIdentifier() {
