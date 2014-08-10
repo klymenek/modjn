@@ -1,6 +1,9 @@
 package de.gandev.modjn.example;
 
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,7 +15,11 @@ public class ServerForTests {
 
     private ServerForTests() {
         modbusServer = new ModbusServer(30502); //ModbusConstants.MODBUS_DEFAULT_PORT);
-        modbusServer.setup(new ModbusRequestHandlerExample());
+        try {
+            modbusServer.setup(new ModbusRequestHandlerExample());
+        } catch (ConnectionException ex) {
+            Logger.getLogger(ServerForTests.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public ModbusServer getModbusServer() {

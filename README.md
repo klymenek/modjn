@@ -21,8 +21,8 @@ Modbus TCP client/server implementation in Java with Netty 4.x
 implement ModbusRequestHandler for server business logic, example [here...](https://github.com/klymenek/modjn/blob/master/src/main/java/de/gandev/modjn/example/ModbusRequestHandlerExample.java)
 
 
-    ModbusServer modbusServer = new ModbusServer(502, new ModbusRequestHandler());
-    modbusServer.setup();
+    ModbusServer modbusServer = new ModbusServer(502);
+    modbusServer.setup(new ModbusRequestHandler());
 
     modbusServer.close();
 
@@ -34,9 +34,9 @@ implement ModbusRequestHandler for server business logic, example [here...](http
     ReadCoilsResponse readCoils = null;
     try {
         readCoils = modbusClient.readCoils(12321, 10);
-        
+
         //modbusClient.[other functions] ...
-        
+
         System.out.println(readCoils);
     } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
         System.out.println(ex.getLocalizedMessage());
