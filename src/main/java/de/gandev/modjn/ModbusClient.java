@@ -136,10 +136,9 @@ public class ModbusClient {
 
         int transactionId = calculateTransactionIdentifier();
         int protocolId = 0;
-        //length of the Function in byte
-        int length = function.calculateLength();
+        int pduLength = function.calculateLength();
 
-        ModbusHeader header = new ModbusHeader(transactionId, protocolId, length, unitId);
+        ModbusHeader header = new ModbusHeader(transactionId, protocolId, pduLength, unitId);
         ModbusFrame frame = new ModbusFrame(header, function);
         channel.writeAndFlush(frame);
 

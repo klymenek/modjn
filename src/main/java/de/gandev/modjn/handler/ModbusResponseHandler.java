@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-public class ModbusResponseHandler extends SimpleChannelInboundHandler<Object> {
+public class ModbusResponseHandler extends SimpleChannelInboundHandler<ModbusFrame> {
 
     private static final Logger logger = Logger.getLogger(ModbusResponseHandler.class.getSimpleName());
     private final Map<Integer, ModbusFrame> responses = new HashMap<>(ModbusConstants.TRANSACTION_COUNTER_RESET);
@@ -49,10 +49,7 @@ public class ModbusResponseHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof ModbusFrame) {
-            ModbusFrame response = (ModbusFrame) msg;
-            responses.put(response.getHeader().getTransactionIdentifier(), response);
-        }
+    protected void channelRead0(ChannelHandlerContext ctx, ModbusFrame response) throws Exception {
+        responses.put(response.getHeader().getTransactionIdentifier(), response);
     }
 }

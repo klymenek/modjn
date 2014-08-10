@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<Object> {
+public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<ModbusFrame> {
 
     private static final Logger logger = Logger.getLogger(ModbusRequestHandler.class.getSimpleName());
     private ModbusServer server;
@@ -53,64 +53,60 @@ public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<O
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ModbusFrame frame) throws Exception {
         Channel channel = ctx.channel();
 
-        if (msg instanceof ModbusFrame) {
-            ModbusFrame frame = (ModbusFrame) msg;
-            ModbusFunction function = frame.getFunction();
+        ModbusFunction function = frame.getFunction();
 
-            ModbusFrame responseFrame;
-            ModbusFunction response;
+        ModbusFunction response;
 
-            logger.log(Level.FINER, function.toString());
+        logger.log(Level.FINER, function.toString());
 
-            if (function instanceof WriteSingleCoil) {
-                WriteSingleCoil request = (WriteSingleCoil) function;
+        if (function instanceof WriteSingleCoil) {
+            WriteSingleCoil request = (WriteSingleCoil) function;
 
-                response = writeSingleCoil(request);
-            } else if (function instanceof WriteSingleRegister) {
-                WriteSingleRegister request = (WriteSingleRegister) function;
+            response = writeSingleCoil(request);
+        } else if (function instanceof WriteSingleRegister) {
+            WriteSingleRegister request = (WriteSingleRegister) function;
 
-                response = writeSingleRegister(request);
-            } else if (function instanceof ReadCoilsRequest) {
-                ReadCoilsRequest request = (ReadCoilsRequest) function;
+            response = writeSingleRegister(request);
+        } else if (function instanceof ReadCoilsRequest) {
+            ReadCoilsRequest request = (ReadCoilsRequest) function;
 
-                response = readCoilsRequest(request);
-            } else if (function instanceof ReadDiscreteInputsRequest) {
-                ReadDiscreteInputsRequest request = (ReadDiscreteInputsRequest) function;
+            response = readCoilsRequest(request);
+        } else if (function instanceof ReadDiscreteInputsRequest) {
+            ReadDiscreteInputsRequest request = (ReadDiscreteInputsRequest) function;
 
-                response = readDiscreteInputsRequest(request);
-            } else if (function instanceof ReadInputRegistersRequest) {
-                ReadInputRegistersRequest request = (ReadInputRegistersRequest) function;
+            response = readDiscreteInputsRequest(request);
+        } else if (function instanceof ReadInputRegistersRequest) {
+            ReadInputRegistersRequest request = (ReadInputRegistersRequest) function;
 
-                response = readInputRegistersRequest(request);
-            } else if (function instanceof ReadHoldingRegistersRequest) {
-                ReadHoldingRegistersRequest request = (ReadHoldingRegistersRequest) function;
+            response = readInputRegistersRequest(request);
+        } else if (function instanceof ReadHoldingRegistersRequest) {
+            ReadHoldingRegistersRequest request = (ReadHoldingRegistersRequest) function;
 
-                response = readHoldingRegistersRequest(request);
-            } else if (function instanceof WriteMultipleRegistersRequest) {
-                WriteMultipleRegistersRequest request = (WriteMultipleRegistersRequest) function;
+            response = readHoldingRegistersRequest(request);
+        } else if (function instanceof WriteMultipleRegistersRequest) {
+            WriteMultipleRegistersRequest request = (WriteMultipleRegistersRequest) function;
 
-                response = writeMultipleRegistersRequest(request);
-            } else if (function instanceof WriteMultipleCoilsRequest) {
-                WriteMultipleCoilsRequest request = (WriteMultipleCoilsRequest) function;
+            response = writeMultipleRegistersRequest(request);
+        } else if (function instanceof WriteMultipleCoilsRequest) {
+            WriteMultipleCoilsRequest request = (WriteMultipleCoilsRequest) function;
 
-                response = writeMultipleCoilsRequest(request);
-            } else {
-                throw new UnsupportedOperationException("Function not supported!");
-            }
-
-            ModbusHeader header = new ModbusHeader(
-                    frame.getHeader().getTransactionIdentifier(),
-                    frame.getHeader().getProtocolIdentifier(),
-                    response.calculateLength(),
-                    frame.getHeader().getUnitIdentifier());
-
-            responseFrame = new ModbusFrame(header, response);
-
-            channel.write(responseFrame);
+            response = writeMultipleCoilsRequest(request);
+        } else {
+            throw new UnsupportedOperationException("Function not supported!");
         }
+
+        ModbusHeader header = new ModbusHeader(
+                frame.getHeader().getTransactionIdentifier(),
+                frame.getHeader().getProtocolIdentifier(),
+                response.calculateLength(),
+                frame.getHeader().getUnitIdentifier());
+
+        ModbusFrame responseFrame = new ModbusFrame(header, response);
+
+        channel.write(responseFrame);
     }
 
     protected abstract WriteSingleCoil writeSingleCoil(WriteSingleCoil request);
