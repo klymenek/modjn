@@ -15,9 +15,9 @@
  */
 package de.gandev.modjn.entity.func;
 
+import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import de.gandev.modjn.entity.ModbusFunction;
 
 /**
  *
@@ -55,8 +55,8 @@ public class ReadInputRegistersRequest extends ModbusFunction {
 
     @Override
     public int calculateLength() {
-        //Function Code + Quantity Of Coils + Starting Address, in Byte + 1 for Unit Identifier
-        return 1 + 2 + 2 + 1;
+        //Function Code + Quantity Of Coils + Starting Address
+        return 1 + 2 + 2;
     }
 
     @Override

@@ -42,10 +42,7 @@ public class ModbusDecoder extends ByteToMessageDecoder {
             return;
         }
 
-        ModbusHeader mbapHeader = new ModbusHeader(buffer.readUnsignedShort(),
-                buffer.readUnsignedShort(),
-                buffer.readUnsignedShort(),
-                buffer.readUnsignedByte());
+        ModbusHeader mbapHeader = ModbusHeader.decode(buffer);
 
         short functionCode = buffer.readUnsignedByte();
 

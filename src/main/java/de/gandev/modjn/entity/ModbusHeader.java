@@ -1,5 +1,8 @@
 package de.gandev.modjn.entity;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 /**
  *
  * @author ares
@@ -11,10 +14,10 @@ public class ModbusHeader {
     private final int length;
     private final short unitIdentifier;
 
-    public ModbusHeader(int transactionIdentifier, int protocolIdentifier, int length, short unitIdentifier) {
+    public ModbusHeader(int transactionIdentifier, int protocolIdentifier, int pduLength, short unitIdentifier) {
         this.transactionIdentifier = transactionIdentifier;
         this.protocolIdentifier = protocolIdentifier;
-        this.length = length;
+        this.length = pduLength + 1; //+ unit identifier
         this.unitIdentifier = unitIdentifier;
     }
 
@@ -32,6 +35,24 @@ public class ModbusHeader {
 
     public short getUnitIdentifier() {
         return unitIdentifier;
+    }
+
+    public static ModbusHeader decode(ByteBuf buffer) {
+        return new ModbusHeader(buffer.readUnsignedShort(),
+                buffer.readUnsignedShort(),
+                buffer.readUnsignedShort(),
+                buffer.readUnsignedByte());
+    }
+
+    public ByteBuf encode() {
+        ByteBuf buf = Unpooled.buffer();
+
+        buf.writeShort(transactionIdentifier);
+        buf.writeShort(protocolIdentifier);
+        buf.writeShort(length);
+        buf.writeByte(unitIdentifier);
+
+        return buf;
     }
 
     @Override

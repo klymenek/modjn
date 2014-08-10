@@ -1,8 +1,8 @@
 package de.gandev.modjn.entity.func;
 
+import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import de.gandev.modjn.entity.ModbusFunction;
 
 /**
  *
@@ -41,15 +41,17 @@ public class WriteSingleRegister extends ModbusFunction {
 
     @Override
     public int calculateLength() {
-        //Function Code + Output Address + Output Value, in Byte + 1 for Unit Identifier
-        return 1 + 2 + 2 + 1;
+        //Function Code + Output Address + Output Value
+        return 1 + 2 + 2;
     }
 
+    @Override
     public void decode(ByteBuf data) {
         registerAddress = data.readUnsignedShort();
         registerValue = data.readUnsignedShort();
     }
 
+    @Override
     public ByteBuf encode() {
         ByteBuf buf = Unpooled.buffer(calculateLength());
         buf.writeByte(getFunctionCode());

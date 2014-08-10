@@ -15,9 +15,9 @@
  */
 package de.gandev.modjn.entity.func;
 
+import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import de.gandev.modjn.entity.ModbusFunction;
 
 /**
  *
@@ -50,7 +50,7 @@ public class ReadHoldingRegistersResponse extends ModbusFunction {
 
     @Override
     public int calculateLength() {
-        return 1 + 1 + byteCount + 1; // + 1 for Unit Identifier;
+        return 1 + 1 + byteCount;
     }
 
     @Override

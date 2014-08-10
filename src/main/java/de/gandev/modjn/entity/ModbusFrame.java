@@ -10,7 +10,7 @@ import io.netty.buffer.Unpooled;
 public class ModbusFrame {
 
     private final ModbusHeader header;
-    private ModbusFunction function;
+    private final ModbusFunction function;
 
     public ModbusFrame(ModbusHeader header, ModbusFunction function) {
         this.header = header;
@@ -28,11 +28,7 @@ public class ModbusFrame {
     public ByteBuf encode() {
         ByteBuf buf = Unpooled.buffer();
 
-        buf.writeShort(header.getTransactionIdentifier());
-        buf.writeShort(header.getProtocolIdentifier());
-        buf.writeShort(header.getLength());
-        buf.writeByte(header.getUnitIdentifier());
-
+        buf.writeBytes(header.encode());
         buf.writeBytes(function.encode());
 
         return buf;
