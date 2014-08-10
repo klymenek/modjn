@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package de.gandev.modjn.entity.func;
+package de.gandev.modjn.entity.func.response;
 
 import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
@@ -23,19 +23,17 @@ import io.netty.buffer.Unpooled;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class WriteMultipleRegistersRequest extends ModbusFunction {
+public class ReadHoldingRegistersResponse extends ModbusFunction {
 
-    private int startingAddress; // 0x0000 to 0xFFFF
-    private int quantityOfRegisters; // 1 - 123 (0x07D0)
     private short byteCount;
     private int[] registers;
 
-    public WriteMultipleRegistersRequest() {
-        super(WRITE_MULTIPLE_REGISTERS);
+    public ReadHoldingRegistersResponse() {
+        super(READ_HOLDING_REGISTERS);
     }
 
-    public WriteMultipleRegistersRequest(int startingAddress, int quantityOfRegisters, int[] registers) {
-        super(WRITE_MULTIPLE_REGISTERS);
+    public ReadHoldingRegistersResponse(int[] registers) {
+        super(READ_HOLDING_REGISTERS);
 
         // maximum of 125 registers
         if (registers.length > 125) {
@@ -44,37 +42,25 @@ public class WriteMultipleRegistersRequest extends ModbusFunction {
 
         this.byteCount = (short) (registers.length * 2);
         this.registers = registers;
-        this.startingAddress = startingAddress;
-        this.quantityOfRegisters = quantityOfRegisters;
-    }
-
-    public short getByteCount() {
-        return byteCount;
-    }
-
-    public int getQuantityOfRegisters() {
-        return quantityOfRegisters;
-    }
-
-    public int getStartingAddress() {
-        return startingAddress;
     }
 
     public int[] getRegisters() {
         return registers;
     }
 
+    public short getByteCount() {
+        return byteCount;
+    }
+
     @Override
     public int calculateLength() {
-        return 1 + 2 + 2 + 1 + byteCount;
+        return 1 + 1 + byteCount;
     }
 
     @Override
     public ByteBuf encode() {
         ByteBuf buf = Unpooled.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
-        buf.writeShort(startingAddress);
-        buf.writeShort(quantityOfRegisters);
         buf.writeByte(byteCount);
 
         for (int i = 0; i < registers.length; i++) {
@@ -86,8 +72,6 @@ public class WriteMultipleRegistersRequest extends ModbusFunction {
 
     @Override
     public void decode(ByteBuf data) {
-        startingAddress = data.readUnsignedShort();
-        quantityOfRegisters = data.readUnsignedShort();
         byteCount = data.readUnsignedByte();
 
         registers = new int[byteCount / 2];
@@ -110,6 +94,6 @@ public class WriteMultipleRegistersRequest extends ModbusFunction {
         registersStr.delete(registersStr.length() - 2, registersStr.length());
         registersStr.append("}");
 
-        return "WriteMultipleRegistersRequest{" + "startingAddress=" + startingAddress + ", quantityOfRegisters=" + quantityOfRegisters + ", byteCount=" + byteCount + ", registers=" + registersStr + '}';
+        return "ReadHoldingRegistersResponse{" + "byteCount=" + byteCount + ", inputRegisters=" + registersStr + '}';
     }
 }

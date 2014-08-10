@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package de.gandev.modjn.entity.func;
+package de.gandev.modjn.entity.func.response;
 
 import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
@@ -46,6 +46,10 @@ public class ReadInputRegistersResponse extends ModbusFunction {
 
     public int[] getInputRegisters() {
         return inputRegisters;
+    }
+
+    public short getByteCount() {
+        return byteCount;
     }
 
     @Override

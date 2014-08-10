@@ -19,7 +19,7 @@ import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
-import de.gandev.modjn.entity.func.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
 import de.gandev.modjn.example.ClientForTests;
 import de.gandev.modjn.example.ServerForTests;
 import static org.junit.Assert.assertNotNull;

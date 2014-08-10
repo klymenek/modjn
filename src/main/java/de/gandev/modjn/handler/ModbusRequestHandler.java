@@ -4,24 +4,25 @@ import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
-import de.gandev.modjn.entity.func.ReadCoilsRequest;
-import de.gandev.modjn.entity.func.ReadCoilsResponse;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsRequest;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsResponse;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersRequest;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersResponse;
-import de.gandev.modjn.entity.func.ReadInputRegistersRequest;
-import de.gandev.modjn.entity.func.ReadInputRegistersResponse;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsRequest;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsResponse;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersRequest;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
+import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
+import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
+import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
+import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
+import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
+import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
+import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
+import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -59,7 +60,7 @@ public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<O
             ModbusFrame responseFrame;
             ModbusFunction response;
 
-            logger.info(function.toString());
+            logger.log(Level.FINER, function.toString());
 
             if (function instanceof WriteSingleCoil) {
                 WriteSingleCoil request = (WriteSingleCoil) function;

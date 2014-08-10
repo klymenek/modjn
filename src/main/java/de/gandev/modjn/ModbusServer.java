@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 public class ModbusServer {
 
-    private static final Logger logger = Logger.getLogger(ModbusServer.class.getSimpleName());
     private final int port;
     private ServerBootstrap bootstrap;
     public static final ChannelGroup allChannels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -55,7 +54,7 @@ public class ModbusServer {
                 }
             });
         } catch (InterruptedException ex) {
-            Logger.getLogger(ModbusServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModbusServer.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
         }
     }
 

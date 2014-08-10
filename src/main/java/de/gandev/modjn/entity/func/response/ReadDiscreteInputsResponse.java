@@ -13,70 +13,75 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package de.gandev.modjn.entity.func;
+package de.gandev.modjn.entity.func.response;
 
 import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.BitSet;
 
 /**
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadDiscreteInputsRequest extends ModbusFunction {
+public class ReadDiscreteInputsResponse extends ModbusFunction {
 
-    private int startingAddress; // 0x0000 to 0xFFFF
-    private int quantityOfCoils; // 1 - 2000 (0x07D0)
+    private short byteCount;
+    private BitSet inputStatus;
 
-    /*
-     * Constructor for Response
-     */
-    public ReadDiscreteInputsRequest() {
+    public ReadDiscreteInputsResponse() {
         super(READ_DISCRETE_INPUTS);
     }
 
-    /*
-     * Constructor for Request
-     */
-    public ReadDiscreteInputsRequest(int startingAddress, int quantityOfCoils) {
+    public ReadDiscreteInputsResponse(BitSet inputStatus) {
         super(READ_DISCRETE_INPUTS);
 
-        this.startingAddress = startingAddress;
-        this.quantityOfCoils = quantityOfCoils;
+        byte[] inputs = inputStatus.toByteArray();
+
+        // maximum of 2000 bits
+        if (inputs.length > 250) {
+            throw new IllegalArgumentException();
+        }
+
+        this.byteCount = (short) inputs.length;
+        this.inputStatus = inputStatus;
     }
 
-    public int getStartingAddress() {
-        return startingAddress;
+    public BitSet getInputStatus() {
+        return inputStatus;
     }
 
-    public int getQuantityOfCoils() {
-        return quantityOfCoils;
+    public short getByteCount() {
+        return byteCount;
     }
 
     @Override
     public int calculateLength() {
-        //Function Code  + Starting Address + Quantity Of Coils
-        return 1 + 2 + 2;
+        return 1 + 1 + byteCount;
     }
 
     @Override
     public ByteBuf encode() {
         ByteBuf buf = Unpooled.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
-        buf.writeShort(startingAddress);
-        buf.writeShort(quantityOfCoils);
+        buf.writeByte(byteCount);
+        buf.writeBytes(inputStatus.toByteArray());
 
         return buf;
     }
 
     @Override
     public void decode(ByteBuf data) {
-        startingAddress = data.readUnsignedShort();
-        quantityOfCoils = data.readUnsignedShort();
+        byteCount = data.readUnsignedByte();
+
+        byte[] inputs = new byte[byteCount];
+        data.readBytes(inputs);
+
+        inputStatus = BitSet.valueOf(inputs);
     }
 
     @Override
     public String toString() {
-        return "ReadDiscreteInputsRequest{" + "startingAddress=" + startingAddress + ", quantityOfCoils=" + quantityOfCoils + '}';
+        return "ReadDiscreteInputsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + inputStatus + '}';
     }
 }

@@ -13,21 +13,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package de.gandev.modjn.entity.func;
+package de.gandev.modjn.entity.func.request;
 
-import de.gandev.modjn.entity.ModbusFunction;
+import de.gandev.modjn.entity.func.AbstractFunction;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.util.BitSet;
 
 /**
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class WriteMultipleCoilsRequest extends ModbusFunction {
+public class WriteMultipleCoilsRequest extends AbstractFunction {
 
-    private int startingAddress; // 0x0000 to 0xFFFF
-    private int quantityOfOutputs; // 1 - 1968 (0x07B0)
+    //startingAddress = 0x0000 to 0xFFFF
+    //quantityOfOutputs = 1 - 1968 (0x07B0)
     private short byteCount;
     private BitSet outputsValue;
 
@@ -36,7 +35,7 @@ public class WriteMultipleCoilsRequest extends ModbusFunction {
     }
 
     public WriteMultipleCoilsRequest(int startingAddress, int quantityOfOutputs, BitSet outputsValue) {
-        super(WRITE_MULTIPLE_COILS);
+        super(WRITE_MULTIPLE_COILS, startingAddress, quantityOfOutputs);
 
         byte[] coils = outputsValue.toByteArray();
 
@@ -47,8 +46,6 @@ public class WriteMultipleCoilsRequest extends ModbusFunction {
 
         this.byteCount = (short) coils.length;
         this.outputsValue = outputsValue;
-        this.startingAddress = startingAddress;
-        this.quantityOfOutputs = quantityOfOutputs;
     }
 
     public short getByteCount() {
@@ -60,24 +57,22 @@ public class WriteMultipleCoilsRequest extends ModbusFunction {
     }
 
     public int getQuantityOfOutputs() {
-        return quantityOfOutputs;
+        return value;
     }
 
     public int getStartingAddress() {
-        return startingAddress;
+        return address;
     }
 
     @Override
     public int calculateLength() {
-        return 1 + 2 + 2 + 1 + byteCount;
+        return super.calculateLength() + 1 + byteCount;
     }
 
     @Override
     public ByteBuf encode() {
-        ByteBuf buf = Unpooled.buffer(calculateLength());
-        buf.writeByte(getFunctionCode());
-        buf.writeShort(startingAddress);
-        buf.writeShort(quantityOfOutputs);
+        ByteBuf buf = super.encode();
+
         buf.writeByte(byteCount);
         buf.writeBytes(outputsValue.toByteArray());
 
@@ -86,8 +81,8 @@ public class WriteMultipleCoilsRequest extends ModbusFunction {
 
     @Override
     public void decode(ByteBuf data) {
-        startingAddress = data.readUnsignedShort();
-        quantityOfOutputs = data.readUnsignedShort();
+        super.decode(data);
+
         byteCount = data.readUnsignedByte();
 
         byte[] coils = new byte[byteCount];
@@ -98,6 +93,6 @@ public class WriteMultipleCoilsRequest extends ModbusFunction {
 
     @Override
     public String toString() {
-        return "WriteMultipleCoilsRequest{" + "startingAddress=" + startingAddress + ", quantityOfOutputs=" + quantityOfOutputs + ", byteCount=" + byteCount + ", outputsValue=" + outputsValue + '}';
+        return "WriteMultipleCoilsRequest{" + "startingAddress=" + address + ", quantityOfOutputs=" + value + ", byteCount=" + byteCount + ", outputsValue=" + outputsValue + '}';
     }
 }

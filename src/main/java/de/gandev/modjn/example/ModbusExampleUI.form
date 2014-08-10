@@ -40,15 +40,18 @@
                       <EmptySpace min="0" pref="185" max="32767" attributes="0"/>
                       <Component id="pConnection" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="jScrollPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
+                          <Component id="btReadDiscreteInputs" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="tfAddr" min="-2" pref="70" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="tfQuantity" min="-2" pref="56" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -59,14 +62,23 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="pConnection" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="btReadCoils" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="tfAddr" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="tfQuantity" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="btReadDiscreteInputs" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="tfAddr" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="tfQuantity" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="379" max="32767" attributes="0"/>
+              <EmptySpace pref="27" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="336" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -134,7 +146,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="tfHost">
           <Properties>
-            <Property name="text" type="java.lang.String" value="localhost"/>
+            <Property name="text" type="java.lang.String" value="10.0.1.55"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="tfPort">
@@ -152,7 +164,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="tfRemotePort">
           <Properties>
-            <Property name="text" type="java.lang.String" value="30502"/>
+            <Property name="text" type="java.lang.String" value="502"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lbClient">
@@ -192,13 +204,21 @@
     </Container>
     <Component class="javax.swing.JTextField" name="tfAddr">
       <Properties>
-        <Property name="text" type="java.lang.String" value="12321"/>
+        <Property name="text" type="java.lang.String" value="12288"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="tfQuantity">
       <Properties>
         <Property name="text" type="java.lang.String" value="10"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="btReadDiscreteInputs">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="ReadDiscreteInputs"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btReadDiscreteInputsActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

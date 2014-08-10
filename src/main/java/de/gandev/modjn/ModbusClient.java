@@ -5,18 +5,18 @@ import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
-import de.gandev.modjn.entity.func.ReadCoilsRequest;
-import de.gandev.modjn.entity.func.ReadCoilsResponse;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsRequest;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsResponse;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersRequest;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersResponse;
-import de.gandev.modjn.entity.func.ReadInputRegistersRequest;
-import de.gandev.modjn.entity.func.ReadInputRegistersResponse;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsRequest;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsResponse;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersRequest;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
+import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
+import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
+import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
+import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
+import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
+import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
+import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
+import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
 import de.gandev.modjn.handler.ModbusChannelInitializer;
@@ -35,7 +35,6 @@ import java.util.logging.Logger;
 
 public class ModbusClient {
 
-    private static final Logger logger = Logger.getLogger(ModbusClient.class.getSimpleName());
     private final String host;
     private final int port;
     private int lastTransactionIdentifier = 0;
@@ -75,7 +74,7 @@ public class ModbusClient {
                 }
             });
         } catch (InterruptedException ex) {
-            Logger.getLogger(ModbusClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModbusClient.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
         }
 
     }

@@ -4,24 +4,23 @@ import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
-import de.gandev.modjn.entity.func.ReadCoilsRequest;
-import de.gandev.modjn.entity.func.ReadCoilsResponse;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsRequest;
-import de.gandev.modjn.entity.func.ReadDiscreteInputsResponse;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersRequest;
-import de.gandev.modjn.entity.func.ReadHoldingRegistersResponse;
-import de.gandev.modjn.entity.func.ReadInputRegistersRequest;
-import de.gandev.modjn.entity.func.ReadInputRegistersResponse;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsRequest;
-import de.gandev.modjn.entity.func.WriteMultipleCoilsResponse;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersRequest;
-import de.gandev.modjn.entity.func.WriteMultipleRegistersResponse;
+import de.gandev.modjn.entity.func.Util;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
+import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
+import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
+import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
+import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
+import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
+import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.handler.ModbusRequestHandler;
 import java.util.BitSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -63,6 +62,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
         taLog = new javax.swing.JTextArea();
         tfAddr = new javax.swing.JTextField();
         tfQuantity = new javax.swing.JTextField();
+        btReadDiscreteInputs = new javax.swing.JButton();
 
         jLabel1.setText("jLabel1");
 
@@ -80,7 +80,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             }
         });
 
-        tfHost.setText("localhost");
+        tfHost.setText("10.0.1.55");
 
         tfPort.setText("30502");
 
@@ -91,7 +91,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             }
         });
 
-        tfRemotePort.setText("30502");
+        tfRemotePort.setText("502");
 
         lbClient.setText("not connected");
 
@@ -147,9 +147,16 @@ public class ModbusExampleUI extends javax.swing.JFrame {
         taLog.setRows(5);
         jScrollPane1.setViewportView(taLog);
 
-        tfAddr.setText("12321");
+        tfAddr.setText("12288");
 
         tfQuantity.setText("10");
+
+        btReadDiscreteInputs.setText("ReadDiscreteInputs");
+        btReadDiscreteInputs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btReadDiscreteInputsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -161,14 +168,16 @@ public class ModbusExampleUI extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 185, Short.MAX_VALUE)
                         .addComponent(pConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btReadCoils)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btReadCoils)
+                            .addComponent(btReadDiscreteInputs))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -176,13 +185,19 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btReadCoils)
-                    .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(btReadCoils)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btReadDiscreteInputs))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(33, 33, 33)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -287,10 +302,10 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             if (readCoils == null) {
                 modbusClient = null;
             } else {
-                taLog.append(readCoils.getCoilStatus().toString() + "\n");
+                taLog.append(Util.getBinaryString(readCoils.getByteCount(), readCoils.getCoilStatus()) + "\n");
             }
         } catch (NoResponseException | ErrorResponseException ex) {
-            Logger.getLogger(ModbusExampleUI.class.getName()).log(Level.SEVERE, null, ex);
+            taLog.append(ex.getLocalizedMessage() + "\n");
         }
     }//GEN-LAST:event_btReadCoilsActionPerformed
 
@@ -299,6 +314,29 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             modbusServer.close();
         }
     }//GEN-LAST:event_formWindowClosing
+
+    private void btReadDiscreteInputsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadDiscreteInputsActionPerformed
+        if (modbusClient == null) {
+            lbClient.setText("not connected");
+            return;
+        }
+
+        int addr = Integer.parseInt(tfAddr.getText());
+        int quantity = Integer.parseInt(tfQuantity.getText());
+
+        ReadDiscreteInputsResponse readDiscreteInputs;
+        try {
+            readDiscreteInputs = modbusClient.readDiscreteInputs(addr, quantity);
+
+            if (readDiscreteInputs == null) {
+                modbusClient = null;
+            } else {
+                taLog.append(Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus()) + "\n");
+            }
+        } catch (NoResponseException | ErrorResponseException ex) {
+            taLog.append(ex.getLocalizedMessage() + "\n");
+        }
+    }//GEN-LAST:event_btReadDiscreteInputsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -317,6 +355,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
     private javax.swing.JButton btConnect;
     private javax.swing.JButton btListen;
     private javax.swing.JButton btReadCoils;
+    private javax.swing.JButton btReadDiscreteInputs;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lbClient;

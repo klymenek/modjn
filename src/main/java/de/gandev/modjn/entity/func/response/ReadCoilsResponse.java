@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package de.gandev.modjn.entity.func;
+package de.gandev.modjn.entity.func.response;
 
 import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
@@ -24,31 +24,35 @@ import java.util.BitSet;
  *
  * @author Andreas Gabriel <ag.gandev@googlemail.com>
  */
-public class ReadDiscreteInputsResponse extends ModbusFunction {
+public class ReadCoilsResponse extends ModbusFunction {
 
     private short byteCount;
-    private BitSet inputStatus;
+    private BitSet coilStatus;
 
-    public ReadDiscreteInputsResponse() {
-        super(READ_DISCRETE_INPUTS);
+    public ReadCoilsResponse() {
+        super(READ_COILS);
     }
 
-    public ReadDiscreteInputsResponse(BitSet inputStatus) {
-        super(READ_DISCRETE_INPUTS);
+    public ReadCoilsResponse(BitSet coilStatus) {
+        super(READ_COILS);
 
-        byte[] inputs = inputStatus.toByteArray();
+        byte[] coils = coilStatus.toByteArray();
 
         // maximum of 2000 bits
-        if (inputs.length > 250) {
+        if (coils.length > 250) {
             throw new IllegalArgumentException();
         }
 
-        this.byteCount = (short) inputs.length;
-        this.inputStatus = inputStatus;
+        this.byteCount = (short) coils.length;
+        this.coilStatus = coilStatus;
     }
 
-    public BitSet getInputStatus() {
-        return inputStatus;
+    public BitSet getCoilStatus() {
+        return coilStatus;
+    }
+
+    public short getByteCount() {
+        return byteCount;
     }
 
     @Override
@@ -61,7 +65,7 @@ public class ReadDiscreteInputsResponse extends ModbusFunction {
         ByteBuf buf = Unpooled.buffer(calculateLength());
         buf.writeByte(getFunctionCode());
         buf.writeByte(byteCount);
-        buf.writeBytes(inputStatus.toByteArray());
+        buf.writeBytes(coilStatus.toByteArray());
 
         return buf;
     }
@@ -70,14 +74,14 @@ public class ReadDiscreteInputsResponse extends ModbusFunction {
     public void decode(ByteBuf data) {
         byteCount = data.readUnsignedByte();
 
-        byte[] inputs = new byte[byteCount];
-        data.readBytes(inputs);
+        byte[] coils = new byte[byteCount];
+        data.readBytes(coils);
 
-        inputStatus = BitSet.valueOf(inputs);
+        coilStatus = BitSet.valueOf(coils);
     }
 
     @Override
     public String toString() {
-        return "ReadDiscreteInputsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + inputStatus + '}';
+        return "ReadCoilsResponse{" + "byteCount=" + byteCount + ", coilStatus=" + coilStatus + '}';
     }
 }
