@@ -3,6 +3,17 @@ modjn
 
 Modbus TCP client/server implementation in Java with Netty 4.x
 
+## currently implemented modbus functions
+
+*    READ COILS | 0x01
+*    READ DISCRETE INPUTS | 0x02
+*    READ HOLDING REGISTERS | 0x03
+*    READ INPUT REGISTERS | 0x04
+*    WRITE SINGLE COIL | 0x05
+*    WRITE SINGLE REGISTER | 0x06
+*    WRITE MULTIPLE COILS | 0x0F
+*    WRITE MULTIPLE REGISTERS | 0x10
+
 ## usage
 
 ### server
