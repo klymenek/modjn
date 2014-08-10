@@ -3,7 +3,7 @@ modjn
 
 Modbus TCP client/server implementation in Java with Netty 4.x
 
-## currently implemented modbus functions
+## Currently implemented modbus functions
 
 *    READ COILS | 0x01
 *    READ DISCRETE INPUTS | 0x02
@@ -14,30 +14,32 @@ Modbus TCP client/server implementation in Java with Netty 4.x
 *    WRITE MULTIPLE COILS | 0x0F
 *    WRITE MULTIPLE REGISTERS | 0x10
 
-## usage
+## Usage
 
-### server
+### Server
 
 implement ModbusRequestHandler for server business logic, example [here...](https://github.com/klymenek/modjn/blob/master/src/main/java/de/gandev/modjn/example/ModbusRequestHandlerExample.java)
 
 
-    ModbusServer modbusServer = new ModbusServer(ModbusConstants.MODBUS_DEFAULT_PORT, new ModbusRequestHandler());
+    ModbusServer modbusServer = new ModbusServer(502, new ModbusRequestHandler());
     modbusServer.setup();
 
     modbusServer.close();
 
-### client
+### Client
 
-    ModbusClient modbusClient = new ModbusClient("localhost"; ModbusConstants.MODBUS_DEFAULT_PORT);
+    ModbusClient modbusClient = new ModbusClient("localhost"; 502);
     modbusClient.setup();
 
     ReadCoilsResponse readCoils = null;
     try {
         readCoils = modbusClient.readCoils(12321, 10);
-    } catch (NoResponseException | ErrorResponseException ex) {
-        Logger.getLogger(Example.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
+        
+        //modbusClient.[other functions] ...
+        
+        System.out.println(readCoils);
+    } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
+        System.out.println(ex.getLocalizedMessage());
     }
-
-    System.out.println(readCoils);
 
     modbusClient.close();
