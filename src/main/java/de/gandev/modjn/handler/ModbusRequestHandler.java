@@ -4,22 +4,21 @@ import de.gandev.modjn.ModbusServer;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
-import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
-import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
-import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
-import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
-import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
-import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
-import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
-import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
-import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
-import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
-import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
-import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
+import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
+import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
+import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
+import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
+import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
+import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.util.logging.Level;
@@ -29,10 +28,14 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-@ChannelHandler.Sharable
 public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<Object> {
 
     private static final Logger logger = Logger.getLogger(ModbusRequestHandler.class.getSimpleName());
+    private ModbusServer server;
+
+    public void setServer(ModbusServer server) {
+        this.server = server;
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -41,12 +44,12 @@ public abstract class ModbusRequestHandler extends SimpleChannelInboundHandler<O
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ModbusServer.allChannels.remove(ctx.channel());
+        server.removeClient(ctx.channel());
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ModbusServer.allChannels.add(ctx.channel());
+        server.addClient(ctx.channel());
     }
 
     @Override

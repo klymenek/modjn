@@ -43,10 +43,18 @@
                   <Component id="jScrollPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
-                          <Component id="btReadDiscreteInputs" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="btReadInputRegisters" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="btReadDiscreteInputs" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="btReadHoldingRegisters" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
                       <Component id="tfAddr" min="-2" pref="70" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="tfQuantity" min="-2" pref="56" max="-2" attributes="0"/>
@@ -65,20 +73,26 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="btReadCoils" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="btReadCoils" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btReadInputRegisters" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btReadDiscreteInputs" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="btReadDiscreteInputs" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btReadHoldingRegisters" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="tfAddr" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="tfQuantity" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace pref="27" max="32767" attributes="0"/>
-              <Component id="jScrollPane1" min="-2" pref="336" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" pref="357" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -174,7 +188,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="lbClients">
           <Properties>
-            <Property name="text" type="java.lang.String" value="0 clients connected"/>
+            <Property name="text" type="java.lang.String" value="server down"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -218,6 +232,22 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btReadDiscreteInputsActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btReadHoldingRegisters">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="ReadHoldingRegisters"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btReadHoldingRegistersActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btReadInputRegisters">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="ReadInputRegisters"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btReadInputRegistersActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

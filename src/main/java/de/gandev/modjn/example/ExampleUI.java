@@ -2,6 +2,7 @@ package de.gandev.modjn.example;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
@@ -21,6 +22,9 @@ import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
 import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
 import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.handler.ModbusRequestHandler;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.BitSet;
 import javax.swing.JOptionPane;
 
@@ -28,7 +32,7 @@ import javax.swing.JOptionPane;
  *
  * @author ares
  */
-public class ModbusExampleUI extends javax.swing.JFrame {
+public class ExampleUI extends javax.swing.JFrame {
 
     private static ModbusClient modbusClient;
     private static ModbusServer modbusServer;
@@ -36,8 +40,43 @@ public class ModbusExampleUI extends javax.swing.JFrame {
     /**
      * Creates new form ModbusTCPExampleUI
      */
-    public ModbusExampleUI() {
+    public ExampleUI() {
         initComponents();
+    }
+
+    private void callModbusFunction(int functionCode) {
+        if (modbusClient == null) {
+            return;
+        }
+
+        int addr = Integer.parseInt(tfAddr.getText());
+        int quantity = Integer.parseInt(tfQuantity.getText());
+
+        try {
+            String response = "FUNCTION NOT SUPPORTED";
+            switch (functionCode) {
+                case ModbusFunction.READ_COILS:
+                    ReadCoilsResponse readCoilsResponse = modbusClient.readCoils(addr, quantity);
+                    response = Util.getBinaryString(readCoilsResponse.getByteCount(), readCoilsResponse.getCoilStatus());
+                    break;
+                case ModbusFunction.READ_DISCRETE_INPUTS:
+                    ReadDiscreteInputsResponse readDiscreteInputs = modbusClient.readDiscreteInputs(addr, quantity);
+                    response = Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus());
+                    break;
+                case ModbusFunction.READ_HOLDING_REGISTERS:
+                    ReadHoldingRegistersResponse readHoldingRegistersResponse = modbusClient.readHoldingRegisters(addr, quantity);
+                    response = Arrays.toString(readHoldingRegistersResponse.getRegisters());
+                    break;
+                case ModbusFunction.READ_INPUT_REGISTERS:
+                    ReadInputRegistersResponse readInputRegistersResponse = modbusClient.readInputRegisters(addr, quantity);
+                    response = Arrays.toString(readInputRegistersResponse.getInputRegisters());
+                    break;
+            }
+
+            taLog.append(response + "\n");
+        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
+            taLog.append(ex.getLocalizedMessage() + "\n");
+        }
     }
 
     /**
@@ -64,6 +103,8 @@ public class ModbusExampleUI extends javax.swing.JFrame {
         tfAddr = new javax.swing.JTextField();
         tfQuantity = new javax.swing.JTextField();
         btReadDiscreteInputs = new javax.swing.JButton();
+        btReadHoldingRegisters = new javax.swing.JButton();
+        btReadInputRegisters = new javax.swing.JButton();
 
         jLabel1.setText("jLabel1");
 
@@ -96,7 +137,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
 
         lbClient.setText("not connected");
 
-        lbClients.setText("0 clients connected");
+        lbClients.setText("server down");
 
         javax.swing.GroupLayout pConnectionLayout = new javax.swing.GroupLayout(pConnection);
         pConnection.setLayout(pConnectionLayout);
@@ -159,6 +200,20 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             }
         });
 
+        btReadHoldingRegisters.setText("ReadHoldingRegisters");
+        btReadHoldingRegisters.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btReadHoldingRegistersActionPerformed(evt);
+            }
+        });
+
+        btReadInputRegisters.setText("ReadInputRegisters");
+        btReadInputRegisters.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btReadInputRegistersActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -172,9 +227,15 @@ public class ModbusExampleUI extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btReadCoils)
-                            .addComponent(btReadDiscreteInputs))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btReadCoils)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btReadInputRegisters))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btReadDiscreteInputs)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btReadHoldingRegisters)))
+                        .addGap(46, 46, 46)
                         .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -189,16 +250,20 @@ public class ModbusExampleUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(btReadCoils)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btReadCoils)
+                            .addComponent(btReadInputRegisters))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btReadDiscreteInputs))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btReadDiscreteInputs)
+                            .addComponent(btReadHoldingRegisters)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(33, 33, 33)
+                        .addGap(30, 30, 30)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -212,58 +277,79 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             modbusServer.close();
         }
 
-        modbusServer = new ModbusServer(Integer.valueOf(port), new ModbusRequestHandler() {
+        modbusServer = new ModbusServer(Integer.valueOf(port));
+
+        modbusServer.addPropertyChangeListener(new PropertyChangeListener() {
 
             @Override
-            protected WriteSingleCoil writeSingleCoil(WriteSingleCoil request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected WriteSingleRegister writeSingleRegister(WriteSingleRegister request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected ReadCoilsResponse readCoilsRequest(ReadCoilsRequest request) {
-                BitSet coils = new BitSet(request.getQuantityOfCoils());
-
-                for (int i = 0; i < request.getQuantityOfCoils(); i++) {
-                    coils.set(i);
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(ModbusServer.PROP_CONNECTIONSTATE)) {
+                    ModbusServer.CONNECTION_STATES state = (ModbusServer.CONNECTION_STATES) evt.getNewValue();
+                    switch (state) {
+                        case down:
+                            lbClients.setText("server down");
+                            break;
+                        case listening:
+                            lbClients.setText("listening");
+                            break;
+                        case clientsConnected:
+                            lbClients.setText(modbusServer.getClientChannels().size() + " clients connected");
+                            break;
+                    }
                 }
-
-                return new ReadCoilsResponse(coils);
             }
-
-            @Override
-            protected ReadDiscreteInputsResponse readDiscreteInputsRequest(ReadDiscreteInputsRequest request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected ReadInputRegistersResponse readInputRegistersRequest(ReadInputRegistersRequest request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected ReadHoldingRegistersResponse readHoldingRegistersRequest(ReadHoldingRegistersRequest request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected WriteMultipleRegistersResponse writeMultipleRegistersRequest(WriteMultipleRegistersRequest request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            protected WriteMultipleCoilsResponse writeMultipleCoilsRequest(WriteMultipleCoilsRequest request) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        }); //ModbusConstants.MODBUS_DEFAULT_PORT);
+        });
 
         try {
-            modbusServer.setup();
-        } catch (Exception ex) {
+            modbusServer.setup(new ModbusRequestHandler() {
+
+                @Override
+                protected WriteSingleCoil writeSingleCoil(WriteSingleCoil request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected WriteSingleRegister writeSingleRegister(WriteSingleRegister request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected ReadCoilsResponse readCoilsRequest(ReadCoilsRequest request) {
+                    BitSet coils = new BitSet(request.getQuantityOfCoils());
+
+                    for (int i = 0; i < request.getQuantityOfCoils(); i++) {
+                        coils.set(i);
+                    }
+
+                    return new ReadCoilsResponse(coils);
+                }
+
+                @Override
+                protected ReadDiscreteInputsResponse readDiscreteInputsRequest(ReadDiscreteInputsRequest request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected ReadInputRegistersResponse readInputRegistersRequest(ReadInputRegistersRequest request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected ReadHoldingRegistersResponse readHoldingRegistersRequest(ReadHoldingRegistersRequest request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected WriteMultipleRegistersResponse writeMultipleRegistersRequest(WriteMultipleRegistersRequest request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                protected WriteMultipleCoilsResponse writeMultipleCoilsRequest(WriteMultipleCoilsRequest request) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+        } catch (ConnectionException ex) {
             JOptionPane.showMessageDialog(this, ex.getLocalizedMessage());
         }
     }//GEN-LAST:event_btListenActionPerformed
@@ -278,36 +364,36 @@ public class ModbusExampleUI extends javax.swing.JFrame {
 
         modbusClient = new ModbusClient(host, Integer.valueOf(port)); //ModbusConstants.MODBUS_DEFAULT_PORT);
 
+        modbusClient.addPropertyChangeListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(ModbusClient.PROP_CONNECTIONSTATE)) {
+                    ModbusClient.CONNECTION_STATES state = (ModbusClient.CONNECTION_STATES) evt.getNewValue();
+                    switch (state) {
+                        case connected:
+                            lbClient.setText("connected");
+                            break;
+                        case notConnected:
+                            lbClient.setText("not connected");
+                            break;
+                        case pending:
+                            lbClient.setText("pending");
+                            break;
+                    }
+                }
+            }
+        });
+
         try {
             modbusClient.setup();
-        } catch (Exception ex) {
+        } catch (ConnectionException ex) {
             JOptionPane.showMessageDialog(this, ex.getLocalizedMessage());
         }
-
-        lbClient.setText("connected");
     }//GEN-LAST:event_btConnectActionPerformed
 
     private void btReadCoilsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadCoilsActionPerformed
-        if (modbusClient == null) {
-            lbClient.setText("not connected");
-            return;
-        }
-
-        int addr = Integer.parseInt(tfAddr.getText());
-        int quantity = Integer.parseInt(tfQuantity.getText());
-
-        ReadCoilsResponse readCoils;
-        try {
-            readCoils = modbusClient.readCoils(addr, quantity);
-
-            if (readCoils == null) {
-                modbusClient = null;
-            } else {
-                taLog.append(Util.getBinaryString(readCoils.getByteCount(), readCoils.getCoilStatus()) + "\n");
-            }
-        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
-            taLog.append(ex.getLocalizedMessage() + "\n");
-        }
+        callModbusFunction(ModbusFunction.READ_COILS);
     }//GEN-LAST:event_btReadCoilsActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -317,27 +403,16 @@ public class ModbusExampleUI extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void btReadDiscreteInputsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadDiscreteInputsActionPerformed
-        if (modbusClient == null) {
-            lbClient.setText("not connected");
-            return;
-        }
-
-        int addr = Integer.parseInt(tfAddr.getText());
-        int quantity = Integer.parseInt(tfQuantity.getText());
-
-        ReadDiscreteInputsResponse readDiscreteInputs;
-        try {
-            readDiscreteInputs = modbusClient.readDiscreteInputs(addr, quantity);
-
-            if (readDiscreteInputs == null) {
-                modbusClient = null;
-            } else {
-                taLog.append(Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus()) + "\n");
-            }
-        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
-            taLog.append(ex.getLocalizedMessage() + "\n");
-        }
+        callModbusFunction(ModbusFunction.READ_DISCRETE_INPUTS);
     }//GEN-LAST:event_btReadDiscreteInputsActionPerformed
+
+    private void btReadInputRegistersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadInputRegistersActionPerformed
+        callModbusFunction(ModbusFunction.READ_INPUT_REGISTERS);
+    }//GEN-LAST:event_btReadInputRegistersActionPerformed
+
+    private void btReadHoldingRegistersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadHoldingRegistersActionPerformed
+        callModbusFunction(ModbusFunction.READ_HOLDING_REGISTERS);
+    }//GEN-LAST:event_btReadHoldingRegistersActionPerformed
 
     /**
      * @param args the command line arguments
@@ -347,7 +422,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ModbusExampleUI().setVisible(true);
+                new ExampleUI().setVisible(true);
             }
         });
     }
@@ -357,6 +432,8 @@ public class ModbusExampleUI extends javax.swing.JFrame {
     private javax.swing.JButton btListen;
     private javax.swing.JButton btReadCoils;
     private javax.swing.JButton btReadDiscreteInputs;
+    private javax.swing.JButton btReadHoldingRegisters;
+    private javax.swing.JButton btReadInputRegisters;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lbClient;

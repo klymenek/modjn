@@ -11,8 +11,8 @@ public class ServerForTests {
     private final ModbusServer modbusServer;
 
     private ServerForTests() {
-        modbusServer = new ModbusServer(30502, new ModbusRequestHandlerExample()); //ModbusConstants.MODBUS_DEFAULT_PORT);
-        modbusServer.setup();
+        modbusServer = new ModbusServer(30502); //ModbusConstants.MODBUS_DEFAULT_PORT);
+        modbusServer.setup(new ModbusRequestHandlerExample());
     }
 
     public ModbusServer getModbusServer() {
