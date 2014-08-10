@@ -131,7 +131,7 @@ public class ModbusClient {
             throws NoResponseException, ErrorResponseException, ConnectionException {
 
         if (channel == null) {
-            throw new ConnectionException("Not connected! .setup() required");
+            throw new ConnectionException("Not connected!");
         }
 
         int transactionId = calculateTransactionIdentifier();
@@ -145,13 +145,13 @@ public class ModbusClient {
 
         ModbusResponseHandler handler = (ModbusResponseHandler) channel.pipeline().get("responseHandler");
         if (handler == null) {
-            throw new ConnectionException("Not connected! .setup() required!");
+            throw new ConnectionException("Not connected!");
         }
 
         return handler.getResponse(transactionId).getFunction();
     }
 
-    public WriteSingleCoil writeCoil(int address, boolean state)
+    public WriteSingleCoil writeSingleCoil(int address, boolean state)
             throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteSingleCoil wsc = new WriteSingleCoil(address, state);
@@ -159,7 +159,7 @@ public class ModbusClient {
         return (WriteSingleCoil) callModbusFunction(wsc);
     }
 
-    public WriteSingleRegister writeRegister(int address, int value)
+    public WriteSingleRegister writeSingleRegister(int address, int value)
             throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteSingleRegister wsr = new WriteSingleRegister(address, value);

@@ -46,7 +46,7 @@ public class ModbusWriteSingleCoilTest {
     public void testWriteCoil() throws NoResponseException, ErrorResponseException, ConnectionException {
         boolean state = true;
         for (int i = 0; i < 20; i++) {
-            WriteSingleCoil writeCoil = modbusClient.writeCoil(12321, state);
+            WriteSingleCoil writeCoil = modbusClient.writeSingleCoil(12321, state);
 
             assertNotNull(writeCoil);
 

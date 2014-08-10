@@ -52,6 +52,9 @@ public class ExampleUI extends javax.swing.JFrame {
         int addr = Integer.parseInt(tfAddr.getText());
         int quantity = Integer.parseInt(tfQuantity.getText());
 
+        int addrWrite = Integer.parseInt(tfAddrWrite.getText());
+        int valueWrite = Integer.parseInt(tfValueWrite.getText());
+
         try {
             String response = "FUNCTION NOT SUPPORTED";
             switch (functionCode) {
@@ -70,6 +73,14 @@ public class ExampleUI extends javax.swing.JFrame {
                 case ModbusFunction.READ_INPUT_REGISTERS:
                     ReadInputRegistersResponse readInputRegistersResponse = modbusClient.readInputRegisters(addr, quantity);
                     response = Arrays.toString(readInputRegistersResponse.getInputRegisters());
+                    break;
+                case ModbusFunction.WRITE_SINGLE_COIL:
+                    WriteSingleCoil writeSingleCoil = modbusClient.writeSingleCoil(addrWrite, valueWrite > 0);
+                    response = writeSingleCoil.toString();
+                    break;
+                case ModbusFunction.WRITE_SINGLE_REGISTER:
+                    WriteSingleRegister writeSingleRegister = modbusClient.writeSingleRegister(addrWrite, valueWrite);
+                    response = writeSingleRegister.toString();
                     break;
             }
 
@@ -97,14 +108,20 @@ public class ExampleUI extends javax.swing.JFrame {
         tfRemotePort = new javax.swing.JTextField();
         lbClient = new javax.swing.JLabel();
         lbClients = new javax.swing.JLabel();
-        btReadCoils = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         taLog = new javax.swing.JTextArea();
-        tfAddr = new javax.swing.JTextField();
-        tfQuantity = new javax.swing.JTextField();
-        btReadDiscreteInputs = new javax.swing.JButton();
-        btReadHoldingRegisters = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         btReadInputRegisters = new javax.swing.JButton();
+        btReadHoldingRegisters = new javax.swing.JButton();
+        btReadCoils = new javax.swing.JButton();
+        tfAddr = new javax.swing.JTextField();
+        btReadDiscreteInputs = new javax.swing.JButton();
+        tfQuantity = new javax.swing.JTextField();
+        jPanel2 = new javax.swing.JPanel();
+        tfAddrWrite = new javax.swing.JTextField();
+        tfValueWrite = new javax.swing.JTextField();
+        btWriteCoil = new javax.swing.JButton();
+        btWriteSingleRegister = new javax.swing.JButton();
 
         jLabel1.setText("jLabel1");
 
@@ -114,6 +131,8 @@ public class ExampleUI extends javax.swing.JFrame {
                 formWindowClosing(evt);
             }
         });
+
+        pConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Connection"));
 
         btListen.setText("listen");
         btListen.addActionListener(new java.awt.event.ActionListener() {
@@ -147,29 +166,32 @@ public class ExampleUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pConnectionLayout.createSequentialGroup()
-                        .addComponent(lbClient, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(tfHost, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lbClients, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(tfPort)
-                    .addComponent(tfRemotePort, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btListen, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                        .addComponent(tfHost, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(tfRemotePort, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btConnect)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbClient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(318, 318, 318))
+                    .addGroup(pConnectionLayout.createSequentialGroup()
+                        .addComponent(tfPort, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btListen, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbClients, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(177, 177, 177))
         );
         pConnectionLayout.setVerticalGroup(
             pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pConnectionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btListen)
-                    .addComponent(tfPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lbClients))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lbClients)
+                        .addComponent(btListen))
+                    .addComponent(tfPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(17, 17, 17)
                 .addGroup(pConnectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btConnect)
                     .addComponent(tfRemotePort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -178,25 +200,16 @@ public class ExampleUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        btReadCoils.setText("ReadCoils");
-        btReadCoils.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btReadCoilsActionPerformed(evt);
-            }
-        });
-
         taLog.setColumns(20);
         taLog.setRows(5);
         jScrollPane1.setViewportView(taLog);
 
-        tfAddr.setText("12288");
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Read"));
 
-        tfQuantity.setText("10");
-
-        btReadDiscreteInputs.setText("ReadDiscreteInputs");
-        btReadDiscreteInputs.addActionListener(new java.awt.event.ActionListener() {
+        btReadInputRegisters.setText("ReadInputRegisters");
+        btReadInputRegisters.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btReadDiscreteInputsActionPerformed(evt);
+                btReadInputRegistersActionPerformed(evt);
             }
         });
 
@@ -207,12 +220,113 @@ public class ExampleUI extends javax.swing.JFrame {
             }
         });
 
-        btReadInputRegisters.setText("ReadInputRegisters");
-        btReadInputRegisters.addActionListener(new java.awt.event.ActionListener() {
+        btReadCoils.setText("ReadCoils");
+        btReadCoils.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btReadInputRegistersActionPerformed(evt);
+                btReadCoilsActionPerformed(evt);
             }
         });
+
+        tfAddr.setText("12288");
+
+        btReadDiscreteInputs.setText("ReadDiscreteInputs");
+        btReadDiscreteInputs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btReadDiscreteInputsActionPerformed(evt);
+            }
+        });
+
+        tfQuantity.setText("10");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btReadCoils)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btReadInputRegisters))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btReadDiscreteInputs)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btReadHoldingRegisters)))
+                .addGap(46, 46, 46)
+                .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btReadCoils)
+                            .addComponent(btReadInputRegisters))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btReadDiscreteInputs)
+                            .addComponent(btReadHoldingRegisters)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap())
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Write"));
+
+        tfAddrWrite.setText("12288");
+
+        tfValueWrite.setText("10");
+
+        btWriteCoil.setText("WriteSingleCoil");
+        btWriteCoil.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btWriteCoilActionPerformed(evt);
+            }
+        });
+
+        btWriteSingleRegister.setText("WriteSingleRegister");
+        btWriteSingleRegister.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btWriteSingleRegisterActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btWriteCoil)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btWriteSingleRegister)
+                .addGap(18, 18, 18)
+                .addComponent(tfAddrWrite, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tfValueWrite, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(tfAddrWrite, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tfValueWrite, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btWriteCoil)
+                        .addComponent(btWriteSingleRegister)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -221,25 +335,10 @@ public class ExampleUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 185, Short.MAX_VALUE)
-                        .addComponent(pConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btReadCoils)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btReadInputRegisters))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btReadDiscreteInputs)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btReadHoldingRegisters)))
-                        .addGap(46, 46, 46)
-                        .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pConnection, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -247,23 +346,12 @@ public class ExampleUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pConnection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btReadCoils)
-                            .addComponent(btReadInputRegisters))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btReadDiscreteInputs)
-                            .addComponent(btReadHoldingRegisters)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(tfAddr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tfQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -414,6 +502,14 @@ public class ExampleUI extends javax.swing.JFrame {
         callModbusFunction(ModbusFunction.READ_HOLDING_REGISTERS);
     }//GEN-LAST:event_btReadHoldingRegistersActionPerformed
 
+    private void btWriteCoilActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btWriteCoilActionPerformed
+        callModbusFunction(ModbusFunction.WRITE_SINGLE_COIL);
+    }//GEN-LAST:event_btWriteCoilActionPerformed
+
+    private void btWriteSingleRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btWriteSingleRegisterActionPerformed
+        callModbusFunction(ModbusFunction.WRITE_SINGLE_REGISTER);
+    }//GEN-LAST:event_btWriteSingleRegisterActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -434,16 +530,22 @@ public class ExampleUI extends javax.swing.JFrame {
     private javax.swing.JButton btReadDiscreteInputs;
     private javax.swing.JButton btReadHoldingRegisters;
     private javax.swing.JButton btReadInputRegisters;
+    private javax.swing.JButton btWriteCoil;
+    private javax.swing.JButton btWriteSingleRegister;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lbClient;
     private javax.swing.JLabel lbClients;
     private javax.swing.JPanel pConnection;
     private javax.swing.JTextArea taLog;
     private javax.swing.JTextField tfAddr;
+    private javax.swing.JTextField tfAddrWrite;
     private javax.swing.JTextField tfHost;
     private javax.swing.JTextField tfPort;
     private javax.swing.JTextField tfQuantity;
     private javax.swing.JTextField tfRemotePort;
+    private javax.swing.JTextField tfValueWrite;
     // End of variables declaration//GEN-END:variables
 }
