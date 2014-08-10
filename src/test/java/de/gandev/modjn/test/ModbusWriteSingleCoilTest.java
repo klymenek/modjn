@@ -17,6 +17,7 @@ package de.gandev.modjn.test;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
@@ -42,7 +43,7 @@ public class ModbusWriteSingleCoilTest {
     }
 
     @Test
-    public void testWriteCoil() throws NoResponseException, ErrorResponseException {
+    public void testWriteCoil() throws NoResponseException, ErrorResponseException, ConnectionException {
         boolean state = true;
         for (int i = 0; i < 20; i++) {
             WriteSingleCoil writeCoil = modbusClient.writeCoil(12321, state);

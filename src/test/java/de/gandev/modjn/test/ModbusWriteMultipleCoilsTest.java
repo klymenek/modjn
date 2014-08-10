@@ -17,6 +17,7 @@ package de.gandev.modjn.test;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
@@ -43,7 +44,7 @@ public class ModbusWriteMultipleCoilsTest {
     }
 
     @Test
-    public void testWriteMultipleCoils() throws NoResponseException, ErrorResponseException {
+    public void testWriteMultipleCoils() throws NoResponseException, ErrorResponseException, ConnectionException {
         int quantityOfCoils = 10;
 
         BitSet coils = new BitSet(quantityOfCoils);

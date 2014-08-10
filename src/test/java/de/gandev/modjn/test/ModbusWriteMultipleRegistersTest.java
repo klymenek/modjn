@@ -17,6 +17,7 @@ package de.gandev.modjn.test;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
@@ -42,7 +43,7 @@ public class ModbusWriteMultipleRegistersTest {
     }
 
     @Test
-    public void testWriteMultipleRegisters() throws NoResponseException, ErrorResponseException {
+    public void testWriteMultipleRegisters() throws NoResponseException, ErrorResponseException, ConnectionException {
         int quantityOfRegisters = 10;
 
         int[] registers = new int[quantityOfRegisters];

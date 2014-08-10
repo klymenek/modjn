@@ -17,6 +17,7 @@ package de.gandev.modjn.test;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
@@ -42,7 +43,7 @@ public class ModbusReadCoilsTest {
     }
 
     @Test
-    public void testReadCoils() throws NoResponseException, ErrorResponseException {
+    public void testReadCoils() throws NoResponseException, ErrorResponseException, ConnectionException {
         ReadCoilsResponse readCoils = modbusClient.readCoils(12321, 10);
 
         assertNotNull(readCoils);

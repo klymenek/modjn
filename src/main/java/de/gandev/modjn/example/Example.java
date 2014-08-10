@@ -2,6 +2,7 @@ package de.gandev.modjn.example;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
@@ -21,7 +22,7 @@ public class Example {
         ReadCoilsResponse readCoils = null;
         try {
             readCoils = modbusClient.readCoils(12321, 10);
-        } catch (NoResponseException | ErrorResponseException ex) {
+        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
             Logger.getLogger(Example.class.getName()).log(Level.SEVERE, ex.getLocalizedMessage());
         }
 

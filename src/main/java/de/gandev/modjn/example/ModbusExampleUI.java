@@ -2,6 +2,7 @@ package de.gandev.modjn.example;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.Util;
@@ -304,7 +305,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             } else {
                 taLog.append(Util.getBinaryString(readCoils.getByteCount(), readCoils.getCoilStatus()) + "\n");
             }
-        } catch (NoResponseException | ErrorResponseException ex) {
+        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
             taLog.append(ex.getLocalizedMessage() + "\n");
         }
     }//GEN-LAST:event_btReadCoilsActionPerformed
@@ -333,7 +334,7 @@ public class ModbusExampleUI extends javax.swing.JFrame {
             } else {
                 taLog.append(Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus()) + "\n");
             }
-        } catch (NoResponseException | ErrorResponseException ex) {
+        } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
             taLog.append(ex.getLocalizedMessage() + "\n");
         }
     }//GEN-LAST:event_btReadDiscreteInputsActionPerformed

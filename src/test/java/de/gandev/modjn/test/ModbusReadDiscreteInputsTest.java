@@ -17,6 +17,7 @@ package de.gandev.modjn.test;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
 import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
@@ -42,7 +43,7 @@ public class ModbusReadDiscreteInputsTest {
     }
 
     @Test
-    public void testReadDiscreteInputs() throws NoResponseException, ErrorResponseException {
+    public void testReadDiscreteInputs() throws NoResponseException, ErrorResponseException, ConnectionException {
         ReadDiscreteInputsResponse readDiscreteInputs = modbusClient.readDiscreteInputs(12321, 10);
 
         assertNotNull(readDiscreteInputs);

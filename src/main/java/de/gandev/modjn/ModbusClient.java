@@ -3,22 +3,23 @@ package de.gandev.modjn;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
+import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
-import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
-import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
-import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
-import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
-import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
-import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
-import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
-import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
-import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
-import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
-import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
-import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.entity.func.WriteSingleCoil;
 import de.gandev.modjn.entity.func.WriteSingleRegister;
+import de.gandev.modjn.entity.func.request.ReadCoilsRequest;
+import de.gandev.modjn.entity.func.request.ReadDiscreteInputsRequest;
+import de.gandev.modjn.entity.func.request.ReadHoldingRegistersRequest;
+import de.gandev.modjn.entity.func.request.ReadInputRegistersRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleCoilsRequest;
+import de.gandev.modjn.entity.func.request.WriteMultipleRegistersRequest;
+import de.gandev.modjn.entity.func.response.ReadCoilsResponse;
+import de.gandev.modjn.entity.func.response.ReadDiscreteInputsResponse;
+import de.gandev.modjn.entity.func.response.ReadHoldingRegistersResponse;
+import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
+import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.handler.ModbusChannelInitializer;
 import de.gandev.modjn.handler.ModbusResponseHandler;
 import io.netty.bootstrap.Bootstrap;
@@ -89,10 +90,10 @@ public class ModbusClient {
     }
 
     public ModbusFunction callModbusFunction(ModbusFunction function)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         if (channel == null) {
-            return null;
+            throw new ConnectionException("Not connected! .setup() required");
         }
 
         int transactionId = calculateTransactionIdentifier();
@@ -106,14 +107,14 @@ public class ModbusClient {
 
         ModbusResponseHandler handler = (ModbusResponseHandler) channel.pipeline().get("responseHandler");
         if (handler == null) {
-            return null;
+            throw new ConnectionException("Not connected! .setup() required!");
         }
 
         return handler.getResponse(transactionId).getFunction();
     }
 
     public WriteSingleCoil writeCoil(int address, boolean state)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteSingleCoil wsc = new WriteSingleCoil(address, state);
 
@@ -121,7 +122,7 @@ public class ModbusClient {
     }
 
     public WriteSingleRegister writeRegister(int address, int value)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteSingleRegister wsr = new WriteSingleRegister(address, value);
 
@@ -129,7 +130,7 @@ public class ModbusClient {
     }
 
     public ReadCoilsResponse readCoils(int startAddress, int quantityOfCoils)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         ReadCoilsRequest rcr = new ReadCoilsRequest(startAddress, quantityOfCoils);
 
@@ -137,7 +138,7 @@ public class ModbusClient {
     }
 
     public ReadDiscreteInputsResponse readDiscreteInputs(int startAddress, int quantityOfCoils)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         ReadDiscreteInputsRequest rdir = new ReadDiscreteInputsRequest(startAddress, quantityOfCoils);
 
@@ -145,7 +146,7 @@ public class ModbusClient {
     }
 
     public ReadInputRegistersResponse readInputRegisters(int startAddress, int quantityOfInputRegisters)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         ReadInputRegistersRequest rirr = new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters);
 
@@ -153,7 +154,7 @@ public class ModbusClient {
     }
 
     public ReadHoldingRegistersResponse readHoldingRegisters(int startAddress, int quantityOfInputRegisters)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         ReadHoldingRegistersRequest rhrr = new ReadHoldingRegistersRequest(startAddress, quantityOfInputRegisters);
 
@@ -161,7 +162,7 @@ public class ModbusClient {
     }
 
     public WriteMultipleCoilsResponse writeMultipleCoils(int address, int quantityOfOutputs, BitSet outputsValue)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteMultipleCoilsRequest wmcr = new WriteMultipleCoilsRequest(address, quantityOfOutputs, outputsValue);
 
@@ -169,7 +170,7 @@ public class ModbusClient {
     }
 
     public WriteMultipleRegistersResponse writeMultipleRegisters(int address, int quantityOfRegisters, int[] registers)
-            throws NoResponseException, ErrorResponseException {
+            throws NoResponseException, ErrorResponseException, ConnectionException {
 
         WriteMultipleRegistersRequest wmrr = new WriteMultipleRegistersRequest(address, quantityOfRegisters, registers);
 
