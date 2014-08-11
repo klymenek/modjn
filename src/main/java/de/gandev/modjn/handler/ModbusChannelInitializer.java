@@ -1,8 +1,10 @@
 package de.gandev.modjn.handler;
 
 import de.gandev.modjn.ModbusConstants;
+import de.gandev.modjn.entity.ModbusFrame;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
@@ -12,9 +14,13 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class ModbusChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private final ModbusRequestHandler handler;
+    private final SimpleChannelInboundHandler handler;
 
     public ModbusChannelInitializer(ModbusRequestHandler handler) {
+        this.handler = handler;
+    }
+
+    public ModbusChannelInitializer(ModbusResponseHandler handler) {
         this.handler = handler;
     }
 
@@ -38,12 +44,23 @@ public class ModbusChannelInitializer extends ChannelInitializer<SocketChannel> 
 
         //Modbus encoder, decoder
         pipeline.addLast("encoder", new ModbusEncoder());
-        pipeline.addLast("decoder", new ModbusDecoder(handler != null));
+        pipeline.addLast("decoder", new ModbusDecoder(handler instanceof ModbusRequestHandler));
 
-        if (handler != null) {
+        if (handler instanceof ModbusRequestHandler) {
+            //server
             pipeline.addLast("requestHandler", handler);
+        } else if (handler instanceof ModbusResponseHandler) {
+            //async client
+            pipeline.addLast("responseHandler", handler);
         } else {
-            pipeline.addLast("responseHandler", new ModbusResponseHandler());
+            //sync client
+            pipeline.addLast("responseHandler", new ModbusResponseHandler() {
+
+                @Override
+                public void newResponse(ModbusFrame frame) {
+                    //discard in sync mode
+                }
+            });
         }
     }
 }

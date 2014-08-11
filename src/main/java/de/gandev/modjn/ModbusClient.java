@@ -1,5 +1,7 @@
 package de.gandev.modjn;
 
+import static de.gandev.modjn.ModbusConstants.DEFAULT_PROTOCOL_IDENTIFIER;
+import static de.gandev.modjn.ModbusConstants.DEFAULT_UNIT_IDENTIFIER;
 import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.ModbusHeader;
@@ -51,20 +53,30 @@ public class ModbusClient {
     private int lastTransactionIdentifier = 0;
     private Channel channel;
     private Bootstrap bootstrap;
-    private short unitId;
+    private short unitIdentifier;
+    private short protocolIdentifier;
     private CONNECTION_STATES connectionState = CONNECTION_STATES.notConnected;
 
     public ModbusClient(String host, int port) {
-        this(host, port, (short) 255);
+        this(host, port, DEFAULT_UNIT_IDENTIFIER, DEFAULT_PROTOCOL_IDENTIFIER);
     }
 
-    public ModbusClient(String host, int port, short unitId) {
+    public ModbusClient(String host, int port, short unitIdentifier) {
+        this(host, port, unitIdentifier, DEFAULT_PROTOCOL_IDENTIFIER);
+    }
+
+    public ModbusClient(String host, int port, short unitId, short protocolIdentifier) {
         this.host = host;
         this.port = port;
-        this.unitId = unitId;
+        this.unitIdentifier = unitId;
+        this.protocolIdentifier = protocolIdentifier;
     }
 
     public void setup() throws ConnectionException {
+        setup(null);
+    }
+
+    public void setup(ModbusResponseHandler handler) throws ConnectionException {
         try {
             final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -72,7 +84,7 @@ public class ModbusClient {
             bootstrap.group(workerGroup);
             bootstrap.channel(NioSocketChannel.class);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-            bootstrap.handler(new ModbusChannelInitializer(null));
+            bootstrap.handler(new ModbusChannelInitializer(handler));
 
             setConnectionState(CONNECTION_STATES.pending);
 
@@ -100,8 +112,18 @@ public class ModbusClient {
 
     }
 
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void close() {
+        if (channel != null) {
+            channel.close().awaitUninterruptibly();
+        }
+    }
+
     private synchronized int calculateTransactionIdentifier() {
-        if (lastTransactionIdentifier < ModbusConstants.TRANSACTION_COUNTER_RESET) {
+        if (lastTransactionIdentifier < ModbusConstants.TRANSACTION_IDENTIFIER_MAX) {
             lastTransactionIdentifier++;
         } else {
             lastTransactionIdentifier = 1;
@@ -127,100 +149,108 @@ public class ModbusClient {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    public ModbusFunction callModbusFunction(ModbusFunction function)
-            throws NoResponseException, ErrorResponseException, ConnectionException {
+    public int callModbusFunction(ModbusFunction function)
+            throws ConnectionException {
 
         if (channel == null) {
             throw new ConnectionException("Not connected!");
         }
 
         int transactionId = calculateTransactionIdentifier();
-        int protocolId = 0;
         int pduLength = function.calculateLength();
 
-        ModbusHeader header = new ModbusHeader(transactionId, protocolId, pduLength, unitId);
+        ModbusHeader header = new ModbusHeader(transactionId, protocolIdentifier, pduLength, unitIdentifier);
         ModbusFrame frame = new ModbusFrame(header, function);
         channel.writeAndFlush(frame);
+
+        return transactionId;
+    }
+
+    public <V extends ModbusFunction> V callModbusFunctionSync(ModbusFunction function)
+            throws NoResponseException, ErrorResponseException, ConnectionException {
+
+        int transactionId = callModbusFunction(function);
 
         ModbusResponseHandler handler = (ModbusResponseHandler) channel.pipeline().get("responseHandler");
         if (handler == null) {
             throw new ConnectionException("Not connected!");
         }
 
-        return handler.getResponse(transactionId).getFunction();
+        //TODO handle cast exception!?
+        return (V) handler.getResponse(transactionId).getFunction();
     }
 
+    //async function execution
+    public int writeSingleCoilAsync(int address, boolean state) throws ConnectionException {
+        return callModbusFunction(new WriteSingleCoil(address, state));
+    }
+
+    public int writeSingleRegisterAsync(int address, int value) throws ConnectionException {
+        return callModbusFunction(new WriteSingleRegister(address, value));
+    }
+
+    public int readCoilsAsync(int startAddress, int quantityOfCoils) throws ConnectionException {
+        return callModbusFunction(new ReadCoilsRequest(startAddress, quantityOfCoils));
+    }
+
+    public int readDiscreteInputsAsync(int startAddress, int quantityOfCoils) throws ConnectionException {
+        return callModbusFunction(new ReadDiscreteInputsRequest(startAddress, quantityOfCoils));
+    }
+
+    public int readInputRegistersAsync(int startAddress, int quantityOfInputRegisters) throws ConnectionException {
+        return callModbusFunction(new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters));
+    }
+
+    public int readHoldingRegistersAsync(int startAddress, int quantityOfInputRegisters) throws ConnectionException {
+        return callModbusFunction(new ReadHoldingRegistersRequest(startAddress, quantityOfInputRegisters));
+    }
+
+    public int writeMultipleCoilsAsync(int address, int quantityOfOutputs, BitSet outputsValue) throws ConnectionException {
+        return callModbusFunction(new WriteMultipleCoilsRequest(address, quantityOfOutputs, outputsValue));
+    }
+
+    public int writeMultipleRegistersAsync(int address, int quantityOfRegisters, int[] registers) throws ConnectionException {
+        return callModbusFunction(new WriteMultipleRegistersRequest(address, quantityOfRegisters, registers));
+    }
+
+    //sync function execution
     public WriteSingleCoil writeSingleCoil(int address, boolean state)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        WriteSingleCoil wsc = new WriteSingleCoil(address, state);
-
-        return (WriteSingleCoil) callModbusFunction(wsc);
+        return this.<WriteSingleCoil>callModbusFunctionSync(new WriteSingleCoil(address, state));
     }
 
     public WriteSingleRegister writeSingleRegister(int address, int value)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        WriteSingleRegister wsr = new WriteSingleRegister(address, value);
-
-        return (WriteSingleRegister) callModbusFunction(wsr);
+        return this.<WriteSingleRegister>callModbusFunctionSync(new WriteSingleRegister(address, value));
     }
 
     public ReadCoilsResponse readCoils(int startAddress, int quantityOfCoils)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        ReadCoilsRequest rcr = new ReadCoilsRequest(startAddress, quantityOfCoils);
-
-        return (ReadCoilsResponse) callModbusFunction(rcr);
+        return this.<ReadCoilsResponse>callModbusFunctionSync(new ReadCoilsRequest(startAddress, quantityOfCoils));
     }
 
     public ReadDiscreteInputsResponse readDiscreteInputs(int startAddress, int quantityOfCoils)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        ReadDiscreteInputsRequest rdir = new ReadDiscreteInputsRequest(startAddress, quantityOfCoils);
-
-        return (ReadDiscreteInputsResponse) callModbusFunction(rdir);
+        return this.<ReadDiscreteInputsResponse>callModbusFunctionSync(new ReadDiscreteInputsRequest(startAddress, quantityOfCoils));
     }
 
     public ReadInputRegistersResponse readInputRegisters(int startAddress, int quantityOfInputRegisters)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        ReadInputRegistersRequest rirr = new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters);
-
-        return (ReadInputRegistersResponse) callModbusFunction(rirr);
+        return this.<ReadInputRegistersResponse>callModbusFunctionSync(new ReadInputRegistersRequest(startAddress, quantityOfInputRegisters));
     }
 
     public ReadHoldingRegistersResponse readHoldingRegisters(int startAddress, int quantityOfInputRegisters)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        ReadHoldingRegistersRequest rhrr = new ReadHoldingRegistersRequest(startAddress, quantityOfInputRegisters);
-
-        return (ReadHoldingRegistersResponse) callModbusFunction(rhrr);
+        return this.<ReadHoldingRegistersResponse>callModbusFunctionSync(new ReadHoldingRegistersRequest(startAddress, quantityOfInputRegisters));
     }
 
     public WriteMultipleCoilsResponse writeMultipleCoils(int address, int quantityOfOutputs, BitSet outputsValue)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        WriteMultipleCoilsRequest wmcr = new WriteMultipleCoilsRequest(address, quantityOfOutputs, outputsValue);
-
-        return (WriteMultipleCoilsResponse) callModbusFunction(wmcr);
+        return this.<WriteMultipleCoilsResponse>callModbusFunctionSync(new WriteMultipleCoilsRequest(address, quantityOfOutputs, outputsValue));
     }
 
     public WriteMultipleRegistersResponse writeMultipleRegisters(int address, int quantityOfRegisters, int[] registers)
             throws NoResponseException, ErrorResponseException, ConnectionException {
-
-        WriteMultipleRegistersRequest wmrr = new WriteMultipleRegistersRequest(address, quantityOfRegisters, registers);
-
-        return (WriteMultipleRegistersResponse) callModbusFunction(wmrr);
-    }
-
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public void close() {
-        if (channel != null) {
-            channel.close().awaitUninterruptibly();
-        }
+        return this.<WriteMultipleRegistersResponse>callModbusFunctionSync(new WriteMultipleRegistersRequest(address, quantityOfRegisters, registers));
     }
 }

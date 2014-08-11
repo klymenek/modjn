@@ -2,9 +2,9 @@ package de.gandev.modjn.handler;
 
 import de.gandev.modjn.ModbusConstants;
 import de.gandev.modjn.entity.ModbusFrame;
-import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
 import de.gandev.modjn.entity.exception.NoResponseException;
+import de.gandev.modjn.entity.func.ModbusError;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.util.HashMap;
@@ -16,15 +16,15 @@ import java.util.logging.Logger;
  *
  * @author ares
  */
-public class ModbusResponseHandler extends SimpleChannelInboundHandler<ModbusFrame> {
+public abstract class ModbusResponseHandler extends SimpleChannelInboundHandler<ModbusFrame> {
 
     private static final Logger logger = Logger.getLogger(ModbusResponseHandler.class.getSimpleName());
-    private final Map<Integer, ModbusFrame> responses = new HashMap<>(ModbusConstants.TRANSACTION_COUNTER_RESET);
+    private final Map<Integer, ModbusFrame> responses = new HashMap<>(ModbusConstants.TRANSACTION_IDENTIFIER_MAX);
 
     public ModbusFrame getResponse(int transactionIdentifier)
             throws NoResponseException, ErrorResponseException {
 
-        long timeoutTime = System.currentTimeMillis() + ModbusConstants.RESPONSE_TIMEOUT;
+        long timeoutTime = System.currentTimeMillis() + ModbusConstants.SYNC_RESPONSE_TIMEOUT;
         ModbusFrame frame;
         do {
             frame = responses.get(transactionIdentifier);
@@ -36,8 +36,8 @@ public class ModbusResponseHandler extends SimpleChannelInboundHandler<ModbusFra
 
         if (frame == null) {
             throw new NoResponseException();
-        } else if (ModbusFunction.isError(frame.getFunction().getFunctionCode())) {
-            throw new ErrorResponseException(frame.getFunction());
+        } else if (frame.getFunction() instanceof ModbusError) {
+            throw new ErrorResponseException((ModbusError) frame.getFunction());
         }
 
         return frame;
@@ -51,5 +51,9 @@ public class ModbusResponseHandler extends SimpleChannelInboundHandler<ModbusFra
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ModbusFrame response) throws Exception {
         responses.put(response.getHeader().getTransactionIdentifier(), response);
+        newResponse(response);
+
     }
+
+    public abstract void newResponse(ModbusFrame frame);
 }

@@ -2,6 +2,7 @@ package de.gandev.modjn.example;
 
 import de.gandev.modjn.ModbusClient;
 import de.gandev.modjn.ModbusServer;
+import de.gandev.modjn.entity.ModbusFrame;
 import de.gandev.modjn.entity.ModbusFunction;
 import de.gandev.modjn.entity.exception.ConnectionException;
 import de.gandev.modjn.entity.exception.ErrorResponseException;
@@ -22,6 +23,7 @@ import de.gandev.modjn.entity.func.response.ReadInputRegistersResponse;
 import de.gandev.modjn.entity.func.response.WriteMultipleCoilsResponse;
 import de.gandev.modjn.entity.func.response.WriteMultipleRegistersResponse;
 import de.gandev.modjn.handler.ModbusRequestHandler;
+import de.gandev.modjn.handler.ModbusResponseHandler;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
@@ -36,6 +38,8 @@ public class ExampleUI extends javax.swing.JFrame {
 
     private static ModbusClient modbusClient;
     private static ModbusServer modbusServer;
+    //
+    private boolean asyncClient;
 
     /**
      * Creates new form ModbusTCPExampleUI
@@ -59,34 +63,100 @@ public class ExampleUI extends javax.swing.JFrame {
             String response = "FUNCTION NOT SUPPORTED";
             switch (functionCode) {
                 case ModbusFunction.READ_COILS:
-                    ReadCoilsResponse readCoilsResponse = modbusClient.readCoils(addr, quantity);
-                    response = Util.getBinaryString(readCoilsResponse.getByteCount(), readCoilsResponse.getCoilStatus());
+                    if (asyncClient) {
+                        modbusClient.readCoilsAsync(addr, quantity);
+                    } else {
+                        ReadCoilsResponse readCoilsResponse = modbusClient.readCoils(addr, quantity);
+                        response = Util.getBinaryString(readCoilsResponse.getByteCount(), readCoilsResponse.getCoilStatus());
+                    }
                     break;
                 case ModbusFunction.READ_DISCRETE_INPUTS:
-                    ReadDiscreteInputsResponse readDiscreteInputs = modbusClient.readDiscreteInputs(addr, quantity);
-                    response = Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus());
+                    if (asyncClient) {
+                        modbusClient.readDiscreteInputs(addr, quantity);
+                    } else {
+                        ReadDiscreteInputsResponse readDiscreteInputs = modbusClient.readDiscreteInputs(addr, quantity);
+                        response = Util.getBinaryString(readDiscreteInputs.getByteCount(), readDiscreteInputs.getInputStatus());
+                    }
                     break;
                 case ModbusFunction.READ_HOLDING_REGISTERS:
-                    ReadHoldingRegistersResponse readHoldingRegistersResponse = modbusClient.readHoldingRegisters(addr, quantity);
-                    response = Arrays.toString(readHoldingRegistersResponse.getRegisters());
+                    if (asyncClient) {
+                        modbusClient.readHoldingRegisters(addr, quantity);
+                    } else {
+                        ReadHoldingRegistersResponse readHoldingRegistersResponse = modbusClient.readHoldingRegisters(addr, quantity);
+                        response = Arrays.toString(readHoldingRegistersResponse.getRegisters());
+                    }
                     break;
                 case ModbusFunction.READ_INPUT_REGISTERS:
-                    ReadInputRegistersResponse readInputRegistersResponse = modbusClient.readInputRegisters(addr, quantity);
-                    response = Arrays.toString(readInputRegistersResponse.getInputRegisters());
+                    if (asyncClient) {
+                        modbusClient.readInputRegisters(addr, quantity);
+                    } else {
+                        ReadInputRegistersResponse readInputRegistersResponse = modbusClient.readInputRegisters(addr, quantity);
+                        response = Arrays.toString(readInputRegistersResponse.getInputRegisters());
+                    }
                     break;
                 case ModbusFunction.WRITE_SINGLE_COIL:
-                    WriteSingleCoil writeSingleCoil = modbusClient.writeSingleCoil(addrWrite, valueWrite > 0);
-                    response = writeSingleCoil.toString();
+                    if (asyncClient) {
+                        modbusClient.writeSingleCoil(addrWrite, valueWrite > 0);
+                    } else {
+                        WriteSingleCoil writeSingleCoil = modbusClient.writeSingleCoil(addrWrite, valueWrite > 0);
+                        response = writeSingleCoil.toString();
+                    }
                     break;
                 case ModbusFunction.WRITE_SINGLE_REGISTER:
-                    WriteSingleRegister writeSingleRegister = modbusClient.writeSingleRegister(addrWrite, valueWrite);
-                    response = writeSingleRegister.toString();
+                    if (asyncClient) {
+                        modbusClient.writeSingleRegister(addrWrite, valueWrite);
+                    } else {
+                        WriteSingleRegister writeSingleRegister = modbusClient.writeSingleRegister(addrWrite, valueWrite);
+                        response = writeSingleRegister.toString();
+                    }
                     break;
             }
 
-            taLog.append(response + "\n");
+            if (!asyncClient) {
+                taLog.append(response + "\n");
+            }
         } catch (NoResponseException | ErrorResponseException | ConnectionException ex) {
             taLog.append(ex.getLocalizedMessage() + "\n");
+        }
+    }
+
+    private void setupClient(ModbusResponseHandler handler) {
+        if (modbusClient != null) {
+            modbusClient.close();
+        }
+
+        asyncClient = handler != null;
+
+        String host = tfHost.getText();
+        String port = tfRemotePort.getText();
+
+        modbusClient = new ModbusClient(host, Integer.valueOf(port)); //ModbusConstants.MODBUS_DEFAULT_PORT);
+
+        modbusClient.addPropertyChangeListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(ModbusClient.PROP_CONNECTIONSTATE)) {
+                    ModbusClient.CONNECTION_STATES state = (ModbusClient.CONNECTION_STATES) evt.getNewValue();
+                    switch (state) {
+                        case connected:
+                            lbClient.setText("connected");
+                            break;
+                        case notConnected:
+                            lbClient.setText("not connected");
+                            break;
+                        case pending:
+                            lbClient.setText("pending");
+                            break;
+                    }
+                }
+            }
+        });
+
+        try {
+            modbusClient.setup(handler);
+        } catch (ConnectionException ex) {
+            JOptionPane.showMessageDialog(this, ex.getLocalizedMessage());
         }
     }
 
@@ -108,6 +178,7 @@ public class ExampleUI extends javax.swing.JFrame {
         tfRemotePort = new javax.swing.JTextField();
         lbClient = new javax.swing.JLabel();
         lbClients = new javax.swing.JLabel();
+        btConnectAsync = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         taLog = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
@@ -158,6 +229,13 @@ public class ExampleUI extends javax.swing.JFrame {
 
         lbClients.setText("server down");
 
+        btConnectAsync.setText("connect async");
+        btConnectAsync.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btConnectAsyncActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pConnectionLayout = new javax.swing.GroupLayout(pConnection);
         pConnection.setLayout(pConnectionLayout);
         pConnectionLayout.setHorizontalGroup(
@@ -171,6 +249,8 @@ public class ExampleUI extends javax.swing.JFrame {
                         .addComponent(tfRemotePort, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btConnect)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btConnectAsync)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lbClient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(318, 318, 318))
@@ -196,7 +276,8 @@ public class ExampleUI extends javax.swing.JFrame {
                     .addComponent(btConnect)
                     .addComponent(tfRemotePort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(tfHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lbClient))
+                    .addComponent(lbClient)
+                    .addComponent(btConnectAsync))
                 .addContainerGap())
         );
 
@@ -443,41 +524,7 @@ public class ExampleUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btListenActionPerformed
 
     private void btConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConnectActionPerformed
-        if (modbusClient != null) {
-            modbusClient.close();
-        }
-
-        String host = tfHost.getText();
-        String port = tfRemotePort.getText();
-
-        modbusClient = new ModbusClient(host, Integer.valueOf(port)); //ModbusConstants.MODBUS_DEFAULT_PORT);
-
-        modbusClient.addPropertyChangeListener(new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals(ModbusClient.PROP_CONNECTIONSTATE)) {
-                    ModbusClient.CONNECTION_STATES state = (ModbusClient.CONNECTION_STATES) evt.getNewValue();
-                    switch (state) {
-                        case connected:
-                            lbClient.setText("connected");
-                            break;
-                        case notConnected:
-                            lbClient.setText("not connected");
-                            break;
-                        case pending:
-                            lbClient.setText("pending");
-                            break;
-                    }
-                }
-            }
-        });
-
-        try {
-            modbusClient.setup();
-        } catch (ConnectionException ex) {
-            JOptionPane.showMessageDialog(this, ex.getLocalizedMessage());
-        }
+        setupClient(null);
     }//GEN-LAST:event_btConnectActionPerformed
 
     private void btReadCoilsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btReadCoilsActionPerformed
@@ -510,6 +557,17 @@ public class ExampleUI extends javax.swing.JFrame {
         callModbusFunction(ModbusFunction.WRITE_SINGLE_REGISTER);
     }//GEN-LAST:event_btWriteSingleRegisterActionPerformed
 
+    private void btConnectAsyncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConnectAsyncActionPerformed
+        ModbusResponseHandler handler = new ModbusResponseHandler() {
+
+            @Override
+            public void newResponse(ModbusFrame frame) {
+                taLog.append(frame.toString() + "\n");
+            }
+        };
+        setupClient(handler);
+    }//GEN-LAST:event_btConnectAsyncActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -525,6 +583,7 @@ public class ExampleUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btConnect;
+    private javax.swing.JButton btConnectAsync;
     private javax.swing.JButton btListen;
     private javax.swing.JButton btReadCoils;
     private javax.swing.JButton btReadDiscreteInputs;

@@ -18,6 +18,7 @@ package de.gandev.modjn.entity.func;
 import de.gandev.modjn.entity.ModbusFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.HashMap;
 
 /**
  *
@@ -104,25 +105,43 @@ public class ModbusError extends ModbusFunction {
      * present on the network.
      */
 
-    private short exceptionCode;
+    private static final HashMap<Short, String> ERRORS = new HashMap<>();
 
-    /*
-     * Constructor for Response to Client
-     */
+    static {
+        ERRORS.put((short) (0x01), "ILLEGAL FUNCTION");
+        ERRORS.put((short) (0x02), "ILLEGAL DATA ADDRESS");
+        ERRORS.put((short) (0x03), "ILLEGAL DATA VALUE");
+        ERRORS.put((short) (0x04), "SLAVE DEVICE FAILURE");
+        ERRORS.put((short) (0x05), "ACKNOWLEDGE");
+        ERRORS.put((short) (0x06), "SLAVE DEVICE BUSY");
+        ERRORS.put((short) (0x08), "MEMORY PARITY ERROR");
+        ERRORS.put((short) (0x0A), "GATEWAY PATH UNAVAILABLE");
+        ERRORS.put((short) (0x0B), "GATEWAY TARGET DEVICE FAILED TO RESPOND");
+    }
+
+    private short exceptionCode;
+    private String exceptionMessage;
+
     public ModbusError(short functionCode) {
         super(functionCode);
     }
 
-    /*
-     * Constructor for Response from Server
-     */
     public ModbusError(short functionCode, short exceptionCode) {
         super(functionCode);
         this.exceptionCode = exceptionCode;
+
+    }
+
+    private void setExceptionMessage(short exceptionCode) {
+        this.exceptionMessage = ERRORS.get(exceptionCode) != null ? ERRORS.get(exceptionCode) : "UNDEFINED ERROR";
     }
 
     public short getExceptionCode() {
         return exceptionCode;
+    }
+
+    public String getExceptionMessage() {
+        return exceptionMessage;
     }
 
     @Override
@@ -142,10 +161,12 @@ public class ModbusError extends ModbusFunction {
     @Override
     public void decode(ByteBuf data) {
         exceptionCode = data.readUnsignedByte();
+
+        setExceptionMessage(exceptionCode);
     }
 
     @Override
     public String toString() {
-        return "ModbusError{" + "exceptionCode=" + exceptionCode + '}';
+        return "ModbusError{" + "exceptionCode=" + exceptionCode + ", exceptionMessage=" + exceptionMessage + '}';
     }
 }

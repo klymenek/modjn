@@ -84,6 +84,8 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btConnect" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Component id="btConnectAsync" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="lbClient" max="32767" attributes="0"/>
                           <EmptySpace min="-2" pref="318" max="-2" attributes="0"/>
                       </Group>
@@ -116,6 +118,7 @@
                       <Component id="tfRemotePort" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="tfHost" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lbClient" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btConnectAsync" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -163,6 +166,14 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="server down"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btConnectAsync">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="connect async"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btConnectAsyncActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

@@ -22,18 +22,26 @@ implement ModbusRequestHandler for server business logic, example [here...](http
 
 
     ModbusServer modbusServer = new ModbusServer(502);
-    modbusServer.setup(new ModbusRequestHandler());
+
+    try {
+        modbusServer.setup(new ModbusRequestHandler());
+    } catch(ConnectionException ex) {
+        System.out.println(ex.getLocalizedMessage());
+    }
 
     modbusServer.close();
 
 ### Client
 
-    ModbusClient modbusClient = new ModbusClient("localhost"; 502);
-    modbusClient.setup();
+switch to async requests by passing an instance of ModbusResponseHandler to the setup function and handle responses by yourself
 
-    ReadCoilsResponse readCoils = null;
+
+    ModbusClient modbusClient = new ModbusClient("localhost"; 502);
+
     try {
-        readCoils = modbusClient.readCoils(12321, 10);
+        modbusClient.setup();
+
+        ReadCoilsResponse readCoils = modbusClient.readCoils(12321, 10);
 
         //modbusClient.[other functions] ...
 
